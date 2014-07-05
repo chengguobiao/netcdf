@@ -58,7 +58,7 @@ class NCObject(object):
         self.variables = {}
         self._is_new = [not os.path.exists(f) for f in self.files]
         self.roots = []
-        self.variable_wrapper = lambda x: x
+        self.variable_wrapper = lambda name, vars: name, vars
         self.create_dim = 'create_dimension'
 
     @property
