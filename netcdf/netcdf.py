@@ -57,6 +57,7 @@ class NCObject(object):
         self.files.sort()
         self.variables = {}
         self._is_new = [not os.path.exists(f) for f in self.files]
+        self.roots = []
 
     @property
     def is_new(self):
