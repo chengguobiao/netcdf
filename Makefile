@@ -88,7 +88,7 @@ test:
 	@ echo "[ tested       ] the system was completly tested"
 
 test-coverage-travis-ci:
-	@ $(SOURCE_ACTIVATE) coverage run --source='netcdf/test_netcdf.py'
+	@ $(SOURCE_ACTIVATE) coverage run --source='netcdf/' netcdf/test_netcdf.py
 
 test-coveralls:
 	@ $(SOURCE_ACTIVATE) coveralls
