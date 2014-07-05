@@ -84,11 +84,11 @@ show-version:
 	@ $(SOURCE_ACTIVATE) $(PYTHON) --version
 
 test:
-	@ $(SOURCE_ACTIVATE) $(PYTHON) manage.py test netcdf
+	@ $(SOURCE_ACTIVATE) $(PYTHON) netcdf/test_netcdf.py
 	@ echo "[ tested       ] the system was completly tested"
 
 test-coverage-travis-ci:
-	@ $(SOURCE_ACTIVATE) coverage run --source='netcdf/models/' manage.py test netcdf
+	@ $(SOURCE_ACTIVATE) coverage run --source='netcdf/test_netcdf.py'
 
 test-coveralls:
 	@ $(SOURCE_ACTIVATE) coveralls

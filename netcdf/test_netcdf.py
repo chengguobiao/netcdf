@@ -83,6 +83,9 @@ class TestNetcdf(unittest.TestCase):
     def tearDown(self):
         [ref.close() for ref in self.refs]
         self.ro_ref.close()
+        os.chmod('ro_unittest.nc', stat.S_IWRITE | stat.S_IRUSR |
+                 stat.S_IRGRP | stat.S_IROTH)
+        os.system('rm *.nc')
 
     def test_open_unexistent_file(self):
         with self.assertRaisesRegexp(Exception, u'There is not file list or '
@@ -108,7 +111,7 @@ class TestNetcdf(unittest.TestCase):
             nc.close(root)
 
     def test_open_close_new_file(self):
-        # delete the filename from the system
+        # delete the filename from the system.
         filename = 'unittest-1.nc'
         if os.path.isfile(filename):
             os.remove(filename)
@@ -125,14 +128,14 @@ class TestNetcdf(unittest.TestCase):
             nc.close(root)
 
     def test_open_close_readonly_file(self):
-        # delete the filename from the system
-        filename = 'readonly.nc'
+        # set the file to be readonly.
+        filename = 'ro_unittest.nc'
         if os.path.isfile(filename):
             os.chmod(filename, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
         # check if create and open a new file.
         root, is_new = nc.open(filename)
-        self.assertEquals(root.files, ['readonly.nc'])
-        self.assertEquals(root.pattern, 'readonly.nc')
+        self.assertEquals(root.files, [filename])
+        self.assertEquals(root.pattern, filename)
         self.assertEquals(len(root.roots), 1)
         self.assertFalse(is_new)
         self.assertTrue(root.read_only)
