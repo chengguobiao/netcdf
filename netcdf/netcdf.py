@@ -58,6 +58,8 @@ class NCObject(object):
         self.variables = {}
         self._is_new = [not os.path.exists(f) for f in self.files]
         self.roots = []
+        self.variable_wrapper = lambda x: x
+        self.create_dim = 'create_dimension'
 
     @property
     def is_new(self):
@@ -73,10 +75,20 @@ class NCObject(object):
     def has_dimension(self, name):
         return all([name in r.dimensions.keys() for r in self.roots])
 
+    def create_dimension(self, name, size):
+        return [getattr(r, self.create_dim)(name, size) for r in self.roots]
+
+    def obtain_dimension(self, name):
+        return self.dimensions[name]
+
     def getdim(self, name, size=None):
         return (self.obtain_dimension(name)
                 if self.has_dimension(name)
                 else self.create_dimension(name, size))
+
+    def obtain_variable(self, name, vtype='f4', dimensions=(), digits=0,
+                        fill_value=None):
+        raise Exception('Subclass responsability')
 
     def getvar(self, name, vtype='', dimensions=(), digits=0,
                fill_value=None, source=None):
@@ -122,12 +134,7 @@ class NCFile(NCObject):
         except Exception:
             self.roots = [Dataset(filename, mode='r', format='NETCDF4')]
         self.variable_wrapper = SingleNCVariable
-
-    def obtain_dimension(self, name):
-        return [r.dimensions[name] for r in self.roots]
-
-    def create_dimension(self, name, size):
-        return [r.createDimension(name, size) for r in self.roots]
+        self.create_dim = 'createDimension'
 
     def obtain_variable(self, name, vtype='f4', dimensions=(), digits=0,
                         fill_value=None):
@@ -155,12 +162,6 @@ class NCPackage(NCObject):
     @property
     def read_only(self):
         return all([r.read_only for r in self.roots])
-
-    def obtain_dimension(self, name):
-        return self.dimensions[name]
-
-    def create_dimension(self, name, size):
-        return [r.create_dimension(name, size) for r in self.roots]
 
     def obtain_variable(self, name, vtype='f4', dimensions=(), digits=0,
                         fill_value=None):
