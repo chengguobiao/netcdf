@@ -65,8 +65,7 @@ libs-and-headers: $(LIBNETCDF)
 
 deployment: libs-and-headers
 	@ echo "[ installing   ] $(PIP) requirements for deployment"
-	@ $(SOURCE_ACTIVATE) $(PIP) install --default-timeout=100 -r requirements.deployment.txt 2>&1 | grep Downloading
-
+	@ $(PIP) install --default-timeout=100 -r requirements.deployment.txt 2>&1 | grep Downloading
 
 bin/activate: requirements.txt
 	@ echo "[ using        ] $(PYTHONPATH)"

@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 import os
-os.system('make libs-and-headers')
+os.system('make deployment')
 
 from pip.req import parse_requirements
 reqs = [str(ir.req) for ir in parse_requirements('requirements.txt')]
@@ -23,7 +23,7 @@ except ImportError:
 
 setup(
     name='netcdf',
-    version='0.0.3',
+    version='0.0.4',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
     packages=find_packages(),
