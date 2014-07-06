@@ -23,10 +23,10 @@ except ImportError:
 
 setup(
     name='netcdf',
-    version='0.0.1',
+    version='0.0.2',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
-    packages=find_packages(),
+    packages=find_packages(include=['LICENCE', 'Makefile', 'README.md', 'requirements.txt']),
     url='https://github.com/ecolell/netcdf',
     license='MIT License, see LICENCE.txt',
     description='A python library that allow to use one or multiple NetCDF '
