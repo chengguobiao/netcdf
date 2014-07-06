@@ -63,6 +63,11 @@ $(LIBNETCDF): $(LIBHDF5)
 libs-and-headers: $(LIBNETCDF)
 	@ $(update_shared_libs)
 
+deployment: libs-and-headers
+	@ echo "[ installing   ] $(PIP) requirements for deployment"
+	@ $(SOURCE_ACTIVATE) $(PIP) install --default-timeout=100 -r requirements.deployment.txt 2>&1 | grep Downloading
+
+
 bin/activate: requirements.txt
 	@ echo "[ using        ] $(PYTHONPATH)"
 	@ echo "[ installing   ] $(VIRTUALENV)"
@@ -71,9 +76,9 @@ bin/activate: requirements.txt
 	@ ($(PYTHONLIBS) $(VIRTUALENV) --python=$(PYTHONPATH) --no-site-packages . 2>&1) >> tracking.log
 	@ echo "[ installing   ] $(PIP) inside $(VIRTUALENV)"
 	@ ($(SOURCE_ACTIVATE) $(EASYINSTALL) pip 2>&1) >> tracking.log
-	@ echo "[ installing   ] numpy inside $(VIRTUALENV)"
-	@ ($(SOURCE_ACTIVATE) $(EASYINSTALL) numpy 2>&1) >> tracking.log
 	@ echo "[ installing   ] $(PIP) requirements"
+	@ $(SOURCE_ACTIVATE) $(PIP) install --default-timeout=100 -r requirements.deployment.txt 2>&1 | grep Downloading
+	@ $(SOURCE_ACTIVATE) $(PIP) install --default-timeout=100 -r requirements.development.txt 2>&1 | grep Downloading
 	@ $(SOURCE_ACTIVATE) $(PIP) install --default-timeout=100 -r requirements.txt 2>&1 | grep Downloading
 	@ touch bin/activate
 
