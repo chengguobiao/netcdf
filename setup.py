@@ -23,7 +23,7 @@ except ImportError:
 
 setup(
     name='netcdf',
-    version='0.0.5',
+    version='0.0.6',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
     packages=find_packages(),
@@ -35,4 +35,12 @@ setup(
     zip_safe=False,
     include_package_data=True,
     install_requires=reqs,
+    classifiers=[
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Atmospheric Science",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Topic :: Scientific/Engineering :: GIS",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "Topic :: Scientific/Engineering :: Physics",
+    ],
 )
