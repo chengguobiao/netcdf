@@ -6,14 +6,8 @@ python:
   - "3.3"
 # command to install dependencies
 install:
-  - "make deploy"
+  - "pip install ."
 # command to run tests
 script: "make test-coverage-travis-ci" #nosetests
 after_success:
   - "make test-coveralls"
-deploy:
-  provider: pypi
-  user: ecolell
-  password: SAb3yyguf71Yms9p5BQZ 
-  on:
-    tags: true
