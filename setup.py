@@ -23,7 +23,7 @@ except ImportError:
 
 setup(
     name='netcdf',
-    version='0.0.6',
+    version='0.0.7',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
     packages=find_packages(),
