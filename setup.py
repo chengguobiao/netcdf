@@ -6,10 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 import os
-try:
-	os.system('make deployment')
-except OSError, e:
-	print e
+os.system('make deployment')
 
 from pip.req import parse_requirements
 reqs = [str(ir.req) for ir in parse_requirements('requirements.txt')]
