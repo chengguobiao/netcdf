@@ -21,12 +21,12 @@ try:
     doc = pandoc.Document()
     doc.markdown = open('README.md').read()
     description = doc.rst
-except ImportError:
+except Exception:
     description = open('README.md').read()
 
 setup(
     name='netcdf',
-    version='0.0.9',
+    version='0.0.10',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
     packages=find_packages(),
