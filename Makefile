@@ -64,8 +64,8 @@ libs-and-headers: $(LIBNETCDF)
 	@ $(update_shared_libs)
 
 deployment: libs-and-headers
-	@ echo "[ installing   ] $(PIP) requirements for deployment"
-	@ sudo pip install --default-timeout=100 -r requirements.deployment.txt 2>&1
+	@ echo "[ pip deploy   ] $(PIP) requirements for deployment with pip"
+	@ pip install --default-timeout=100 -r requirements.deployment.txt
 
 bin/activate: requirements.txt
 	@ echo "[ using        ] $(PYTHONPATH)"
@@ -90,11 +90,11 @@ show-version:
 	@ $(SOURCE_ACTIVATE) $(PYTHON) --version
 
 test:
-	@ $(SOURCE_ACTIVATE) $(PYTHON) netcdf/test_netcdf.py
+	@ $(SOURCE_ACTIVATE) $(PYTHON) tests/netcdf_test.py
 	@ echo "[ tested       ] the system was completly tested"
 
 test-coverage-travis-ci:
-	@ $(SOURCE_ACTIVATE) coverage run --source='netcdf/' netcdf/test_netcdf.py
+	@ $(SOURCE_ACTIVATE) coverage run tests/netcdf_test.py
 
 test-coveralls:
 	@ $(SOURCE_ACTIVATE) coveralls
