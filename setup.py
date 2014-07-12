@@ -6,7 +6,12 @@ except ImportError:
     from distutils.core import setup
 
 import os
-os.system('make deployment')
+os.system('easy_install numpy')
+os.system('pip install -r requirements.deployment.txt')
+
+from cpp_libs import install_netcdf4
+install_netcdf4()
+
 
 from pip.req import parse_requirements
 reqs = [str(ir.req) for ir in parse_requirements('requirements.txt')]

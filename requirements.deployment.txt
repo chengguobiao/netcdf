@@ -1,1 +1,2 @@
 pyandoc==0.0.1
+progressbar==2.2
