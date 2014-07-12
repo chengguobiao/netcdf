@@ -6,7 +6,7 @@ python:
   - "3.3"
 # command to install dependencies
 install:
-  - "sudo pip install ."
+  - "make deploy"
 # command to run tests
 script: "make test-coverage-travis-ci" #nosetests
 after_success:
