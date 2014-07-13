@@ -64,14 +64,14 @@ def get(path, url):
 
 def build(path, pre_config='', post_config=''):
     filename = systems[os_name]['libs'][path.split('-')[0]]
-    print filename
-    if not os.path.isfile(filename):
-        ncores = multiprocessing.cpu_count()
-        os.system('cd %s; %s ./configure %s; make -j %s;'
-                  ' sudo make check install'
-                  % (path, pre_config, post_config, ncores))
-        if update_shared_libs:
-            os.system(systems[os_name]['update_shared_libs'])
+    if os.path.isfile(filename):
+        os.system('sudo rm %s' % filename)
+    ncores = multiprocessing.cpu_count()
+    os.system('cd %s; %s ./configure %s; make -j %s;'
+              ' sudo make install'  # check
+              % (path, pre_config, post_config, ncores))
+    if update_shared_libs:
+        os.system(systems[os_name]['update_shared_libs'])
 
 
 def install_hdf5():

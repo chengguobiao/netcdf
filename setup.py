@@ -9,8 +9,8 @@ import os
 os.system('easy_install numpy==1.8.0')
 os.system('pip install -r requirements.deployment.txt')
 
-from cpp_libs import install_netcdf4
-install_netcdf4()
+import cpp_libs
+cpp_libs.install_netcdf4()
 
 
 from pip.req import parse_requirements
