@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 import os
-os.system('easy_install numpy')
+os.system('easy_install numpy==1.8.0')
 os.system('pip install -r requirements.deployment.txt')
 
 from cpp_libs import install_netcdf4
