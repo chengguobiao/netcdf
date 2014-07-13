@@ -25,7 +25,7 @@ bin/activate: requirements.txt
 	@ ($(SOURCE_ACTIVATE) $(EASYINSTALL) pip 2>&1) >> tracking.log
 	@ echo "[ installing   ] $(PIP) requirements"
 	@ $(SOURCE_ACTIVATE) $(PIP) install --default-timeout=100 -r requirements.development.txt 2>&1 | grep Downloading
-	@ $(SOURCE_ACTIVATE) $(PIP) install .
+	@ $(SOURCE_ACTIVATE) $(PIP) install -e  .
 	@ touch bin/activate
 
 deploy: bin/activate
