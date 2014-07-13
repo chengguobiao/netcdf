@@ -53,4 +53,4 @@ pypi-upload: test
 
 clean:
 	@ echo "[ cleaning     ] remove deployment generated files that doesn't exists in the git repository"
-	@ sudo rm -rf virtualenv* hdf5* netcdf-4* bin/ lib/ lib64 include/ build/ share setuptools-*.tar.gz get-pip.py tracking.log subversion .Python
+	@ rm -rf virtualenv* hdf5* netcdf-4* bin/ lib/ lib64 include/ build/ share setuptools-*.tar.gz get-pip.py tracking.log subversion .Python

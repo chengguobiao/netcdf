@@ -87,6 +87,7 @@ def install_netcdf4():
     name = 'netcdf-%s' % '4.3.1-rc4'
     get(name, 'ftp://ftp.unidata.ucar.edu/pub/netcdf')
     build(name,
-          pre_config='LDFLAGS=-L/usr/local/lib CPPFLAGS=-I/usr/local/include',
+          pre_config='LDFLAGS=-L/usr/local/lib CPPFLAGS=-I/usr/local/include '
+          'LD_LIBRARY_PATH=/usr/local',
           post_config='--enable-netcdf-4 --enable-dap --enable-shared'
           ' --prefix=/usr/local')
