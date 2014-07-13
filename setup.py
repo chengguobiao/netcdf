@@ -28,7 +28,7 @@ except Exception:
 
 setup(
     name='netcdf',
-    version='0.0.11',
+    version='0.0.12',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
     packages=find_packages(),
