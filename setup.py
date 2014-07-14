@@ -2,6 +2,7 @@
 try:
     from setuptools import setup
     from setuptools import find_packages
+    from setuptools.command import build_py as _build_py
 except ImportError:
     from distutils.core import setup
 
@@ -9,8 +10,7 @@ from pip.req import parse_requirements
 reqs = [str(ir.req) for ir in parse_requirements('requirements.txt')]
 
 import os
-os.system('easy_install numpy==1.8.0')
-os.system('pip install -r requirements.deployment.txt')
+os.system('pip install pyandoc==0.0.1 progressbar==2.2 numpy==1.8.0')
 
 
 # Try to transform the README from Markdown to reStructuredText.
@@ -67,69 +67,77 @@ class FakeAgent(FancyURLopener, object):
     'Safari/537.36'
 
 
-downloader = FakeAgent()
+class build_py(_build_py.build_py):
+
+    def get(self, path, url, local_path):
+        filename = '%s.tar.gz' % path
+        local_filename = '%s/%s' % (local_path, filename)
+        local_unpacked = '%s/%s' % (local_path, path)
+        if not os.path.isfile('%s/%s' % (local_path, filename)):
+            widgets = [filename, '  ', pb.Percentage(), ' ',
+                       pb.Bar('#', u'\033[34m[', u']\033[0m'),
+                       ' ', pb.ETA(), ' ', pb.FileTransferSpeed()]
+            bar = pb.ProgressBar(maxval=20, widgets=widgets)
+
+            def dlProgress(count, blockSize, totalSize):
+                bar.maxval = totalSize
+                status = (count * blockSize if totalSize >= count * blockSize
+                          else totalSize)
+                bar.update(status)
+            downloader = FakeAgent()
+            downloader.retrieve('%s/%s' % (url, filename), local_filename,
+                                reporthook=dlProgress)
+        if not os.path.isdir(local_unpacked):
+            tfile = tar.open(local_filename, mode='r:gz')
+            tfile.extractall(local_path)
+            tfile.close()
+
+    def build_pkg(self, path, pre_config='', post_config=''):
+        lib_key = path.split('-')[0].split('/')[-1]
+        filename = systems[os_name]['libs'][lib_key]
+        if os.path.isfile(filename):
+            os.system('sudo rm %s' % filename)
+        ncores = multiprocessing.cpu_count()
+        os.system('cd %s; %s ./configure %s; make -j %s;'
+                  ' sudo make install' # check
+                  % (path, pre_config, post_config, ncores))
+        update_shared_libs = systems[os_name]['update_shared_libs']
+        if update_shared_libs:
+            os.system(update_shared_libs)
+
+    def install_hdf5(self):
+        # Deploy the hdf5 C library
+        name = 'hdf5-%s' % '1.8.12'
+        self.get(name,
+                 'http://www.hdfgroup.org/ftp/HDF5/releases/%s/src' % (name),
+                 source_path)
+        config_params = '--prefix=/usr/local --enable-shared --enable-hl'
+        self.build_pkg('%s/%s' % (source_path, name),
+                       post_config=config_params)
+
+    def install_netcdf4(self):
+        # Deploy the netcdf4 C library
+        name = 'netcdf-%s' % '4.3.1-rc4'
+        self.get(name, 'ftp://ftp.unidata.ucar.edu/pub/netcdf', source_path)
+        config_params = '--enable-netcdf-4 --enable-dap --enable-shared'
+        ' --prefix=/usr/local'
+        self.build_pkg('%s/%s' % (source_path, name),
+                       pre_config='LDFLAGS=-L/usr/local/lib '
+                       'CPPFLAGS=-I/usr/local/include '
+                       'LD_LIBRARY_PATH=/usr/local',
+                       post_config=config_params)
+
+    def initialize_options(self):
+        print "Building binary libraries..."
+        self.install_hdf5()
+        self.install_netcdf4()
+        print "Building python libraries..."
+        return _build_py.build_py.initialize_options(self)
 
 
-def get(path, url, local_path):
-    filename = '%s.tar.gz' % path
-    local_filename = '%s/%s' % (local_path, filename)
-    local_unpacked = '%s/%s' % (local_path, path)
-    if not os.path.isfile('%s/%s' % (local_path, filename)):
-        widgets = [filename, '  ', pb.Percentage(), ' ',
-                   pb.Bar('#', u'\033[34m[', u']\033[0m'),
-                   ' ', pb.ETA(), ' ', pb.FileTransferSpeed()]
-        bar = pb.ProgressBar(maxval=20, widgets=widgets)
-
-        def dlProgress(count, blockSize, totalSize):
-            bar.maxval = totalSize
-            status = (count * blockSize if totalSize >= count * blockSize
-                      else totalSize)
-            bar.update(status)
-        downloader.retrieve('%s/%s' % (url, filename), local_filename,
-                            reporthook=dlProgress)
-    if not os.path.isdir(local_unpacked):
-        tfile = tar.open(local_filename, mode='r:gz')
-        tfile.extractall(local_path)
-        tfile.close()
-
-
-def build(path, pre_config='', post_config=''):
-    lib_key = path.split('-')[0].split('/')[-1]
-    filename = systems[os_name]['libs'][lib_key]
-    if os.path.isfile(filename):
-        os.system('sudo rm %s' % filename)
-    ncores = multiprocessing.cpu_count()
-    os.system('cd %s; %s ./configure %s; make -j %s;'
-              ' sudo make install'  # check
-              % (path, pre_config, post_config, ncores))
-    update_shared_libs = systems[os_name]['update_shared_libs']
-    if update_shared_libs:
-        os.system(update_shared_libs)
-
-
-def install_libs():
-    global source_path
-    # Deploy the hdf5 C library
-    name = 'hdf5-%s' % '1.8.12'
-    get(name,
-        'http://www.hdfgroup.org/ftp/HDF5/releases/%s/src' % (name),
-        source_path)
-    build('%s/%s' % (source_path, name),
-          post_config='--prefix=/usr/local --enable-shared --enable-hl')
-    # Deploy the netcdf4 C library
-    name = 'netcdf-%s' % '4.3.1-rc4'
-    get(name, 'ftp://ftp.unidata.ucar.edu/pub/netcdf', source_path)
-    build('%s/%s' % (source_path, name),
-          pre_config='LDFLAGS=-L/usr/local/lib CPPFLAGS=-I/usr/local/include '
-          'LD_LIBRARY_PATH=/usr/local',
-          post_config='--enable-netcdf-4 --enable-dap --enable-shared'
-          ' --prefix=/usr/local')
-
-
-install_libs()
 setup(
     name='netcdf',
-    version='0.0.16',
+    version='0.0.17',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
     packages=packs,
@@ -149,4 +157,5 @@ setup(
         "Topic :: Scientific/Engineering :: Information Analysis",
         "Topic :: Scientific/Engineering :: Physics",
     ],
+    cmdclass={'build_py': build_py},
 )
