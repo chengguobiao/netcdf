@@ -5,9 +5,26 @@ try:
 except ImportError:
     from distutils.core import setup
 
+from pip.req import parse_requirements
+reqs = [str(ir.req) for ir in parse_requirements('requirements.txt')]
+
 import os
 os.system('easy_install numpy==1.8.0')
 os.system('pip install -r requirements.deployment.txt')
+
+
+# Try to transform the README from Markdown to reStructuredText.
+try:
+    import pandoc
+    pandoc.core.PANDOC_PATH = 'pandoc'
+    doc = pandoc.Document()
+    doc.markdown = open('README.md').read()
+    description = doc.rst
+except Exception:
+    description = open('README.md').read()
+
+packs = find_packages()
+
 
 import platform as p
 from urllib import FancyURLopener
@@ -108,26 +125,11 @@ def install_libs():
           post_config='--enable-netcdf-4 --enable-dap --enable-shared'
           ' --prefix=/usr/local')
 
-from pip.req import parse_requirements
-reqs = [str(ir.req) for ir in parse_requirements('requirements.txt')]
-
-# Try to transform the README from Markdown to reStructuredText.
-try:
-    import pandoc
-    pandoc.core.PANDOC_PATH = 'pandoc'
-    doc = pandoc.Document()
-    doc.markdown = open('README.md').read()
-    description = doc.rst
-except Exception:
-    description = open('README.md').read()
-
-packs = find_packages()
 
 install_libs()
-
 setup(
     name='netcdf',
-    version='0.0.15',
+    version='0.0.16',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
     packages=packs,
