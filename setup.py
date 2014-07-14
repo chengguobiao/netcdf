@@ -14,17 +14,20 @@ os.system('pip install pyandoc==0.0.1 progressbar==2.2 numpy==1.8.0')
 
 
 # Try to transform the README from Markdown to reStructuredText.
-try:
-    import pandoc
-    pandoc.core.PANDOC_PATH = 'pandoc'
-    doc = pandoc.Document()
-    doc.markdown = open('README.md').read()
-    description = doc.rst
-except Exception:
-    description = open('README.md').read()
+def get_description(filename):
+    try:
+        import pandoc
+        pandoc.core.PANDOC_PATH = 'pandoc'
+        doc = pandoc.Document()
+        doc.markdown = open(filename).read()
+        description = doc.rst
+    except Exception:
+        description = open(filename).read()
+    return description
 
-packs = find_packages()
-
+readme_file = 'README.md'
+description = (get_description(readme_file)
+               if os.path.isfile(readme_file) else '')
 
 import platform as p
 from urllib import FancyURLopener
@@ -137,10 +140,10 @@ class build_py(_build_py.build_py):
 
 setup(
     name='netcdf',
-    version='0.0.17',
+    version='0.0.18',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
-    packages=packs,
+    packages=find_packages(),
     url='https://github.com/ecolell/netcdf',
     license='MIT License, see LICENCE.txt',
     description='A python library that allow to use one or multiple NetCDF '
