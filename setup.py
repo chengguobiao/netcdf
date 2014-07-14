@@ -108,7 +108,6 @@ def install_libs():
           post_config='--enable-netcdf-4 --enable-dap --enable-shared'
           ' --prefix=/usr/local')
 
-install_libs()
 from pip.req import parse_requirements
 reqs = [str(ir.req) for ir in parse_requirements('requirements.txt')]
 
@@ -122,12 +121,16 @@ try:
 except Exception:
     description = open('README.md').read()
 
+packs = find_packages()
+
+install_libs()
+
 setup(
     name='netcdf',
-    version='0.0.14',
+    version='0.0.15',
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
-    packages=find_packages(),
+    packages=packs,
     url='https://github.com/ecolell/netcdf',
     license='MIT License, see LICENCE.txt',
     description='A python library that allow to use one or multiple NetCDF '
