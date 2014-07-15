@@ -24,8 +24,8 @@ bin/activate: requirements.txt
 	@ echo "[ installing   ] $(PIP) inside $(VIRTUALENV)"
 	@ ($(SOURCE_ACTIVATE) $(EASYINSTALL) pip 2>&1) >> tracking.log
 	@ echo "[ installing   ] $(PIP) requirements"
-	@ $(SOURCE_ACTIVATE) $(PIP) install --default-timeout=100 -r requirements.development.txt 2>&1 | grep Downloading
 	@ $(SOURCE_ACTIVATE) $(PIP) install -e  .
+	@ $(SOURCE_ACTIVATE) $(PIP) install --default-timeout=100 -r requirements.development.txt 2>&1 | grep Downloading
 	@ touch bin/activate
 
 deploy: bin/activate
