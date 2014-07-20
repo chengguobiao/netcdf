@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-try:
-    from setuptools import setup
-    from setuptools import find_packages
-except ImportError:
-    from distutils.core import setup
+from distutils.core import setup
+from pkgutil import walk_packages
 from distutils.command.build_py import build_py
 from distutils.cmd import Command
 import os
@@ -27,6 +24,17 @@ def calculate_version():
         fh.write(version_msg + os.linesep + "__version__=" + version_git)
     return version_git
 
+
+def find_packages(path='.', prefix=''):
+    yield prefix
+    prefix = prefix + "."
+    for _, name, ispkg in walk_packages(path, prefix):
+        if ispkg:
+            yield name
+
+import netcdf
+packages = list(find_packages(netcdf.__path__, netcdf.__name__))
+print packages
 requirements = [str(ir.req) for ir in parse_requirements('requirements.txt')]
 version_git = calculate_version()
 os.system('pip install pyandoc==0.0.1')
@@ -91,7 +99,6 @@ class LibraryBuilder(Command):
         if not os.path.isfile(local_filename):
             os.system('pip install progressbar==2.2')
             import progressbar as pb
-            import tarfile as tar
             widgets = [filename, '  ', pb.Percentage(), ' ',
                        pb.Bar('#', u'\033[34m[', u']\033[0m'),
                        ' ', pb.ETA(), ' ', pb.FileTransferSpeed()]
@@ -106,6 +113,7 @@ class LibraryBuilder(Command):
             downloader.retrieve('%s/%s' % (url, filename), local_filename,
                                 reporthook=dlProgress)
         if not os.path.isdir(local_unpacked):
+            import tarfile as tar
             tfile = tar.open(local_filename, mode='r:gz')
             tfile.extractall(local_path)
             tfile.close()
@@ -174,7 +182,7 @@ setup(
     version=version_git,
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
-    packages=find_packages(),
+    packages=packages,
     url='https://github.com/ecolell/netcdf',
     license='MIT License, see LICENCE.txt',
     description='A python library that allow to use one or multiple NetCDF '
