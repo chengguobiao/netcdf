@@ -29,7 +29,7 @@ def calculate_version():
 
 
 requirements = [str(ir.req) for ir in parse_requirements('requirements.txt')]
-version_git = '0.0.23'  # calculate_version()
+version_git = calculate_version()
 import platform as p
 tmp_path = '/tmp/'
 os_name = p.system()
