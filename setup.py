@@ -1,16 +1,18 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from distutils.core import setup
-from pkgutil import walk_packages
-from distutils.command.build_py import build_py
-from distutils.cmd import Command
+from distutils.command.build import build
 import os
+import subprocess
 from pip.req import parse_requirements
+from urllib import urlretrieve
+from datetime import datetime
+import sys
 
 
 def calculate_version():
     # Fetch version from git tags, and write to version.py.
     # Also, when git is not available (PyPi package), use stored version.py.
-    import subprocess
     version_py = os.path.join(os.path.dirname(__file__), 'version.py')
     try:
         version_git = subprocess.check_output(["git", "describe"]).rstrip()
@@ -25,37 +27,55 @@ def calculate_version():
     return version_git
 
 
-def find_packages(path='.', prefix=''):
-    yield prefix
-    prefix = prefix + "."
-    for _, name, ispkg in walk_packages(path, prefix):
-        if ispkg:
-            yield name
-
-import netcdf
-packages = list(find_packages(netcdf.__path__, netcdf.__name__))
-print packages
 requirements = [str(ir.req) for ir in parse_requirements('requirements.txt')]
-version_git = calculate_version()
-os.system('pip install pyandoc==0.0.1')
+version_git = '0.0.23'  # calculate_version()
 import platform as p
-source_path = '/usr/sources'
+tmp_path = '/tmp/'
 os_name = p.system()
+binaries = {
+    'hdf5': {
+        'version': '1.8.12',
+        'name': 'hdf5-%s',
+        'url': 'http://www.hdfgroup.org/ftp/HDF5/releases/%s/src',
+        'compile': {
+            'depends': ['numpy==1.8.0'],
+            'config': {
+                'pre': '',
+                'post': '--prefix=/usr/local --enable-shared --enable-hl',
+            },
+        },
+    },
+    'netcdf': {
+        'version': '4.3.1-rc4',
+        'name': 'netcdf-%s',
+        'url': 'ftp://ftp.unidata.ucar.edu/pub/netcdf',
+        'compile': {
+            'depends': [],
+            'config': {
+                'pre': ('LDFLAGS=-L/usr/local/lib '
+                        'CPPFLAGS=-I/usr/local/include '
+                        'LD_LIBRARY_PATH=/usr/local'),
+                'post': ('--enable-netcdf-4 --enable-dap --enable-shared'
+                         ' --prefix=/usr/local'),
+            },
+        },
+    },
+}
 systems = {
     'Linux': {
         'update_shared_libs': 'sudo ldconfig',
         'libs': {
             'hdf5': '/usr/local/lib/libhdf5.so.8.0.1',
-            'netcdf': '/usr/local/lib/libnetcdf.so.7.2.0'
-        }
+            'netcdf': '/usr/local/lib/libnetcdf.so.7.2.0',
+        },
     },
     'Darwin': {
         'update_shared_libs': '',
         'libs': {
             'hdf5': '/usr/local/lib/libhdf5_hl.8.dylib',
-            'netcdf': '/usr/local/lib/libnetcdf.7.dylib'
-        }
-    }
+            'netcdf': '/usr/local/lib/libnetcdf.7.dylib',
+        },
+    },
 }
 
 
@@ -74,107 +94,81 @@ def get_long_description():
         description = open(readme_file).read()
     return description
 
-from urllib import FancyURLopener
 
+class Builder:
 
-class FakeAgent(FancyURLopener, object):
-    version = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) '
-               'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.149 '
-               'Safari/537.36')
+    def __init__(self, lib):
+        self.lib_key = lib
+        self.lib = binaries[lib]
+        self.name = self.lib['name'] % self.lib['version']
 
+    def call(self, cmd):
+        return subprocess.call(cmd, shell=True)
 
-class LibraryBuilder(Command):
-
-    def initialize_options(self):
-        self.title = '%s %s' % (os_name, p.architecture()[0])
-        self.bar = '-' * len(self.title)
-
-    def finalize_options(self):
-        pass
-
-    def get(self, path, url, local_path):
-        filename = '%s.tar.gz' % path
-        local_filename = '%s/%s' % (local_path, filename)
-        local_unpacked = '%s/%s' % (local_path, path)
-        if not os.path.isfile(local_filename):
-            os.system('pip install progressbar==2.2')
-            import progressbar as pb
-            widgets = [filename, '  ', pb.Percentage(), ' ',
-                       pb.Bar('#', u'\033[34m[', u']\033[0m'),
-                       ' ', pb.ETA(), ' ', pb.FileTransferSpeed()]
-            bar = pb.ProgressBar(maxval=20, widgets=widgets)
+    def download(self):
+        url = self.lib['url']
+        if url.find('%s') > 0:
+            url = url % self.name
+        filename = '%s.tar.gz' % self.name
+        self.local_filename = '%s%s' % (tmp_path, filename)
+        if not os.path.isfile(self.local_filename):
+            begin = datetime.now()
 
             def dlProgress(count, blockSize, totalSize):
-                bar.maxval = totalSize
-                status = (count * blockSize if totalSize >= count * blockSize
-                          else totalSize)
-                bar.update(status)
-            downloader = FakeAgent()
-            downloader.retrieve('%s/%s' % (url, filename), local_filename,
-                                reporthook=dlProgress)
-        if not os.path.isdir(local_unpacked):
+                transfered = (count * blockSize
+                              if totalSize >= count * blockSize else totalSize)
+                progress = transfered * 100. / totalSize
+                speed = (transfered /
+                         ((datetime.now() - begin).total_seconds())) / 1024
+                print '\r%s' % (' ' * 78),
+                print (u'\rDownloaded %s '
+                       '(\033[33m%03.2f %%\033[0m at \033[35m%i KB/s\033[0m)'
+                       % (filename, progress, speed)),
+                sys.stdout.flush()
+            source = '%s/%s' % (url, filename)
+            destiny = '%s%s' % (tmp_path, filename)
+            self.local_filename, _ = urlretrieve(source, destiny,
+                                                 reporthook=dlProgress)
+
+    def uncompress(self):
+        self.local_unpacked = '%s%s' % (tmp_path, self.name)
+        if not os.path.isdir(self.local_unpacked):
+            self.download()
+            # self.call('rm -rf %s*' % self.local_unpacked)
             import tarfile as tar
-            tfile = tar.open(local_filename, mode='r:gz')
-            tfile.extractall(local_path)
+            tfile = tar.open(self.local_filename, mode='r:gz')
+            tfile.extractall(tmp_path)
             tfile.close()
+            self.call('chmod -R ugo+rwx %s*' % self.local_unpacked)
 
-    def build_pkg(self, path, pre_config='', post_config=''):
-        import multiprocessing
-        lib_key = path.split('-')[0].split('/')[-1]
-        filename = systems[os_name]['libs'][lib_key]
-        if os.path.isfile(filename):
-            os.system('sudo rm %s' % filename)
-        ncores = multiprocessing.cpu_count()
-        os.system(('cd %s; %s ./configure %s; make -j %s; '
-                   ' sudo make install')  # check
-                  % (path, pre_config, post_config, ncores))
-        update_shared_libs = systems[os_name]['update_shared_libs']
-        if update_shared_libs:
-            os.system(update_shared_libs)
-
-    def install_hdf5(self):
-        # Deploy the hdf5 C library
-        name = 'hdf5-%s' % '1.8.12'
-        self.get(name,
-                 'http://www.hdfgroup.org/ftp/HDF5/releases/%s/src' % (name),
-                 source_path)
-        config_params = '--prefix=/usr/local --enable-shared --enable-hl'
-        self.build_pkg('%s/%s' % (source_path, name),
-                       post_config=config_params)
-
-    def install_netcdf4(self):
-        # Deploy the netcdf4 C library
-        name = 'netcdf-%s' % '4.3.1-rc4'
-        self.get(name, 'ftp://ftp.unidata.ucar.edu/pub/netcdf', source_path)
-        config_params = ('--enable-netcdf-4 --enable-dap --enable-shared'
-                         ' --prefix=/usr/local')
-        self.build_pkg('%s/%s' % (source_path, name),
-                       pre_config=('LDFLAGS=-L/usr/local/lib '
-                                   'CPPFLAGS=-I/usr/local/include '
-                                   'LD_LIBRARY_PATH=/usr/local'),
-                       post_config=config_params)
-
-    def run(self):
-        print '+%s+' % self.bar
-        print '|%s|' % self.title
-        print '+%s+' % self.bar
-        import sys
-        sys.stdout.flush()
-        os.system('pip install numpy==1.8.0 >> tracking.log')
-        os.system('sudo mkdir -p %s' % source_path)
-        os.system('sudo chmod -R ugo+rwx %s' % source_path)
-        self.install_hdf5()
-        self.install_netcdf4()
+    def build(self):
+        filename = systems[os_name]['libs'][self.lib_key]
+        if not os.path.isfile(filename):
+            self.uncompress()
+            depends = self.lib['compile']['depends']
+            [self.call('easy_install %s' % dep) for dep in depends]
+            title = '%s %s' % (os_name, p.architecture()[0])
+            bar = '-' * len(title)
+            print '+%s+\n|%s|\n+%s+' % (bar, title, bar)
+            import multiprocessing
+            # self.call('sudo rm %s' % filename)
+            path = '%s%s' % (tmp_path, self.lib['name'] % self.lib['version'])
+            config = self.lib['compile']['config']
+            ncores = multiprocessing.cpu_count()
+            self.call(('cd %s; %s ./configure %s; make -j %s; '
+                       ' sudo make install')
+                      % (path, config['pre'], config['post'], ncores))
+            update_shared_libs = systems[os_name]['update_shared_libs']
+            if update_shared_libs:
+                self.call(update_shared_libs)
 
 
-class BuildWrapper(build_py):
+class build_wrapper(build):
     def initialize_options(self):
-        print "+--------------------------------+"
-        print "|Analizing binary requirements...|"
-        print "+--------------------------------+"
-        print "for version %s" % version_git
-        self.run_command('build_bin_lib')
-        build_py.initialize_options(self)
+        # Deploy all the described libraries in the binaries dictionary.
+        libs = sorted(binaries.keys())
+        [Builder(lib).build() for lib in libs]
+        return build.initialize_options(self)
 
 
 setup(
@@ -182,14 +176,13 @@ setup(
     version=version_git,
     author=u'Eloy Adonis Colell',
     author_email='eloy.colell@gmail.com',
-    packages=packages,
+    packages=['netcdf', ],
     url='https://github.com/ecolell/netcdf',
     license='MIT License, see LICENCE.txt',
     description='A python library that allow to use one or multiple NetCDF '
                 'files in a transparent way through polimorphic methods.',
     long_description=get_long_description(),
-    zip_safe=False,
-    include_package_data=True,
+    zip_safe=True,
     install_requires=requirements,
     classifiers=[
         "Intended Audience :: Science/Research",
@@ -200,7 +193,6 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
     cmdclass={
-        'build_bin_lib': LibraryBuilder,
-        'build_py': BuildWrapper,
+        'build': build_wrapper,
     },
 )

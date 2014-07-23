@@ -51,6 +51,11 @@ pypi-upload: test
 	@ ($(SOURCE_ACTIVATE) $(PYTHON) setup.py sdist upload 2>&1) >> tracking.log
 	@ echo "[ uploaded     ] the new version was successfully uploaded"
 
+pypitest-upload: test
+	@ echo "[ uploading    ] package to pypi servers"
+	$(SOURCE_ACTIVATE) $(PYTHON) setup.py sdist upload -r https://testpypi.python.org/pypi
+	@ echo "[ uploaded     ] the new version was successfully uploaded"
+
 clean:
 	@ echo "[ cleaning     ] remove deployment generated files that doesn't exists in the git repository"
-	@ rm -rf virtualenv* hdf5* netcdf-4* bin/ lib/ lib64 include/ build/ share setuptools-*.tar.gz get-pip.py tracking.log subversion .Python
+	@ rm -rf MANIFEST virtualenv* hdf5* netcdf-4* bin/ lib/ lib64 include/ build/ share setuptools-*.tar.gz get-pip.py tracking.log subversion .Python
