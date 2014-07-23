@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from distutils.core import setup
 from distutils.command.build import build
+from setuptools.command import easy_install
 import os
 import subprocess
 from pip.req import parse_requirements
@@ -146,7 +147,7 @@ class Builder:
         if not os.path.isfile(filename):
             self.uncompress()
             depends = self.lib['compile']['depends']
-            [self.call('easy_install %s' % dep) for dep in depends]
+            [easy_install.main(['-U', dep]) for dep in depends]
             title = '%s %s' % (os_name, p.architecture()[0])
             bar = '-' * len(title)
             print '+%s+\n|%s|\n+%s+' % (bar, title, bar)
