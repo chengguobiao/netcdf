@@ -38,6 +38,10 @@ test:
 	@ $(SOURCE_ACTIVATE) $(PYTHON) tests/netcdf_test.py
 	@ echo "[ tested       ] the system was completly tested"
 
+shell:
+	@ $(SOURCE_ACTIVATE) ipython
+	@ echo "[ tested       ] the system was completly tested"
+
 test-coverage-travis-ci:
 	@ $(SOURCE_ACTIVATE) coverage run --source='netcdf/' tests/netcdf_test.py
 
@@ -59,3 +63,7 @@ pypitest-upload: test
 clean:
 	@ echo "[ cleaning     ] remove deployment generated files that doesn't exists in the git repository"
 	@ rm -rf MANIFEST virtualenv* hdf5* netcdf-4* bin/ lib/ lib64 include/ build/ share setuptools-*.tar.gz get-pip.py tracking.log subversion .Python
+
+hardclean:
+	@ echo "[ cleaning     ] remove the netcdf4 and hdf5 C libraries from /usr/local/lib"
+	@ sudo rm /usr/local/lib/libnetcdf* /usr/local/lib/libhdf5*
