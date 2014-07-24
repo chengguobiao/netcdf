@@ -48,7 +48,7 @@ test-coverage: test-coverage-travis-ci test-coveralls
 
 pypi-upload: test
 	@ echo "[ uploading    ] package to pypi servers"
-	@ ($(SOURCE_ACTIVATE) $(PYTHON) setup.py sdist upload 2>&1) >> tracking.log
+	@ ($(SOURCE_ACTIVATE) $(PYTHON) setup.py sdist upload -r https://pypi.python.org/pypi 2>&1) >> tracking.log
 	@ echo "[ uploaded     ] the new version was successfully uploaded"
 
 pypitest-upload: test
