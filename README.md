@@ -10,7 +10,7 @@ A python library that allow to use one or multiple NetCDF files in a transparent
 Requirements
 ------------
 
-If you want to use this repository on any GNU/Linux or OSX system you just need to execute:
+If you want to use this library on any GNU/Linux or OSX system you just need to execute:
 
     $ pip install netcdf
 
@@ -18,7 +18,9 @@ If you want to improve this library, you should download the [github repository]
 
     $ make deploy
 
-As an exception, for Ubuntu Desktop (or Ubuntu in general) you can use the command:
+This library is builded over two **C libraries** (named **libhdf5** and **libnetcdf** in *aptitude*). To provide a cross-platform installation, the [setup.py](https://github.com/ecolell/netcdf/blob/master/setup.py) is going to require the **sudo** password to automate the installation of these two libraries.
+
+On Ubuntu Desktop there are some other libraries not installed by default (zlibc curl libssl0.9.8 libbz2-dev libxslt*-dev libxml*-dev) which may need to be installed to use these library. Use the next command to automate the installation of the additional C libraries:
 
     $ make ubuntu deploy
 
