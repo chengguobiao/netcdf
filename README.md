@@ -38,7 +38,7 @@ Example
 
 It can open one or multiple files with the same statement. You can use a **pattern**:
 
-```python
+```python linenum
 from netcdf import netcdf as nc
 root, is_new = nc.open('file_*.nc')
 print root.files
