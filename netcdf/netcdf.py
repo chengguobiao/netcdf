@@ -247,37 +247,61 @@ class DistributedNCVariable(NCVariable):
 
 def open(pattern):
     """
-    Open a root descriptor to work with one or multiple NetCDF files.
+    Return a root descriptor to work with one or multiple NetCDF files.
+
+    Keyword arguments:
+    pattern -- a list of filenames or a string pattern.
     """
-    obj = NCObject.open(pattern)
-    return obj, obj.is_new
+    root = NCObject.open(pattern)
+    return root, root.is_new
 
 
-def getdim(obj, name, size=None):
+def getdim(root, name, size=None):
     """
-    Return the dimension list of a NCFile or NCPackage instance.
+    Return a dimension from a NCFile or NCPackage instance. If the dimension
+    doesn't exists create it.
+
+    Keyword arguments:
+    root -- the root descriptor returned by the 'open' function
+    name -- the name of the dimension
+    size -- the size of the dimension, if it has a fixed size (default None)
     """
-    dim = obj.getdim(name, size)
-    return dim
+    return root.getdim(name, size)
 
 
-def getvar(obj, name, vtype='', dimensions=(), digits=0, fill_value=None,
+def getvar(root, name, vtype='', dimensions=(), digits=0, fill_value=None,
            source=None):
     """
-    Return the numpy matrix of a variable from a NCFile or NCPackage instance.
+    Return a variable from a NCFile or NCPackage instance. If the variable
+    doesn't exists create it.
+
+    Keyword arguments:
+    root -- the root descriptor returned by the 'open' function
+    name -- the name of the variable
+    vtype -- the type of each value, ex ['f4', 'i4', 'i1', 'S1'] (default '')
+    dimensions -- the tuple with the dimension names of the variable (default ())
+    digits -- the precision required when using a 'f4' vtype (default 0)
+    fill_value -- the initial value used in the creation time (default None)
+    source -- the source variable to be copied (default None)
     """
-    return obj.getvar(name, vtype, dimensions, digits, fill_value, source)
+    return root.getvar(name, vtype, dimensions, digits, fill_value, source)
 
 
-def sync(obj):
+def sync(root):
     """
     Force the root descriptor to synchronize writing the buffers to the disk.
+
+    Keyword arguments:
+    root -- the root descriptor returned by the 'open' function
     """
-    obj.sync()
+    root.sync()
 
 
-def close(obj):
+def close(root):
     """
     Close the root descriptor and write the buffer to the disk.
+
+    Keyword arguments:
+    root -- the root descriptor returned by the 'open' function
     """
-    obj.close()
+    root.close()
