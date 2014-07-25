@@ -39,7 +39,7 @@ binaries = {
         'name': 'hdf5-%s',
         'url': 'http://www.hdfgroup.org/ftp/HDF5/releases/%s/src',
         'compile': {
-            'depends': ['numpy==1.8.0'],
+            'depends': ['pyandoc==0.0.1', 'numpy==1.8.0'],
             'config': {
                 'pre': '',
                 'post': '--prefix=/usr/local --enable-shared --enable-hl',
@@ -187,6 +187,13 @@ setup(
     install_requires=requirements,
     classifiers=[
         "Intended Audience :: Science/Research",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
         "Topic :: Scientific/Engineering :: Atmospheric Science",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: GIS",
