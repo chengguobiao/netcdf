@@ -147,10 +147,14 @@ class NCFile(NCObject):
                         fill_value=None):
         build = self.roots[0].createVariable
         options = {'zlib': True,
-                   'fill_value': fill_value}
+                   'fill_value': None}  # fill_value}
         if digits > 0:
             options['least_significant_digit'] = digits
-        return [build(name, vtype, dimensions, **options)]
+        vars = [build(name, vtype, dimensions, **options)]
+        # NOTE: It fill the fill_value manually to overcome a base library bug.
+        for v in vars:
+            v[:] = fill_value
+        return vars
 
 
 class NCPackage(NCObject):
@@ -209,7 +213,8 @@ class NCVariable(object):
     def __getattr__(self, name):
         print 'Unhandled [class: %s, instance: %s, attr: %s]' % (
             self.__class__, self.name, name)
-        import ipdb; ipdb.set_trace()
+        import ipdb
+        ipdb.set_trace()
 
     def sync(self):
         for v in self.variables:
@@ -279,7 +284,7 @@ def getvar(root, name, vtype='', dimensions=(), digits=0, fill_value=None,
     root -- the root descriptor returned by the 'open' function
     name -- the name of the variable
     vtype -- the type of each value, ex ['f4', 'i4', 'i1', 'S1'] (default '')
-    dimensions -- the tuple with the dimension names of the variable (default ())
+    dimensions -- the tuple with dimensions name of the variables (default ())
     digits -- the precision required when using a 'f4' vtype (default 0)
     fill_value -- the initial value used in the creation time (default None)
     source -- the source variable to be copied (default None)

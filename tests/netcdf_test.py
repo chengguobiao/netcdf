@@ -192,6 +192,8 @@ class TestNetcdf(unittest.TestCase):
         var = nc.getvar(root, 'data')
         self.assertEquals(var.shape, (1, 100, 200))
         self.assertIn('data', root.variables)
+        are_equals = (var[:] == np.zeros(var.shape) + 1.)
+        self.assertTrue(are_equals.all())
         nc.close(root)
 
     def test_get_non_existing_var_single_file(self):
@@ -200,9 +202,13 @@ class TestNetcdf(unittest.TestCase):
         self.assertNotIn('new_variable', root.variables)
         var = nc.getvar(root, 'new_variable',
                         'f4', ('time', 'yc', 'xc'),
-                        digits=3, fill_value=0.0)
+                        digits=3, fill_value=1.2)
         self.assertEquals(var.shape, (1, 100, 200))
         self.assertIn('new_variable', root.variables)
+        ref = np.zeros(var.shape) + 1.2
+        # the comparison is true if the error is less than 0.002
+        are_equals = (var[:] - ref) < 0.002
+        self.assertTrue(are_equals.all())
         nc.close(root)
 
     def test_get_existing_var_multiple_file(self):
@@ -212,6 +218,8 @@ class TestNetcdf(unittest.TestCase):
         var = nc.getvar(root, 'data')
         self.assertEquals(var.shape, (5, 100, 200))
         self.assertIn('data', root.variables)
+        are_equals = (var[:] == np.zeros(var.shape) + 1.)
+        self.assertTrue(are_equals.all())
         nc.close(root)
 
     def test_get_non_existing_var_multiple_file(self):
@@ -220,9 +228,13 @@ class TestNetcdf(unittest.TestCase):
         self.assertNotIn('new_variable', root.variables)
         var = nc.getvar(root, 'new_variable',
                         'f4', ('time', 'yc', 'xc'),
-                        digits=3, fill_value=0.0)
+                        digits=3, fill_value=1.2)
         self.assertEquals(var.shape, (5, 100, 200))
         self.assertIn('new_variable', root.variables)
+        ref = np.zeros(var.shape) + 1.2
+        # the comparison is true if the error is less than 0.002
+        are_equals = (var[:] - ref) < 0.002
+        self.assertTrue(are_equals.all())
         nc.close(root)
 
     def test_single_file_var_operations(self):
@@ -244,6 +256,7 @@ class TestNetcdf(unittest.TestCase):
         # check if get and set the numpy matrix.
         root = nc.open('unittest0*.nc')[0]
         var = nc.getvar(root, 'data')
+        self.assertEquals(var.__class__, nc.DistributedNCVariable)
         self.assertEquals(var[:].__class__, np.ndarray)
         tmp = var[:]
         var[:] = var[:] + 1
@@ -253,6 +266,28 @@ class TestNetcdf(unittest.TestCase):
         var = nc.getvar(root, 'data')
         self.assertTrue(var, tmp + 1)
         nc.close(root)
+
+    def test_single_file_new_var_operations(self):
+        # check if create a new var.
+        root = nc.open('unittest00.nc')[0]
+        var = nc.getvar(root, 'new_variable',
+                        'f4', ('time', 'yc', 'xc'),
+                        digits=3, fill_value=1.0)
+        self.assertEquals(var.__class__, nc.SingleNCVariable)
+        self.assertEquals(var[:].__class__, np.ndarray)
+        tmp = var[:]
+        var[:] = var[:] + 1
+        nc.close(root)
+        # check if value was saved into the file.
+        root = nc.open('unittest00.nc')[0]
+        var = nc.getvar(root, 'new_variable')
+        self.assertTrue(var, tmp + 1)
+        nc.close(root)
+
+    def test_multiple_file_new_var_operations(self):
+        # check if create a new var.
+        # check if value was saved into the file.
+        pass
 
     def test_character_variables_in_single_file(self):
         # check if get and set the numpy string matrix in single files.
