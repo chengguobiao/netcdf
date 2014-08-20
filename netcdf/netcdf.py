@@ -147,13 +147,11 @@ class NCFile(NCObject):
                         fill_value=None):
         build = self.roots[0].createVariable
         options = {'zlib': True,
-                   'fill_value': None}  # fill_value}
+                   'fill_value': fill_value}
         if digits > 0:
             options['least_significant_digit'] = digits
         vars = [build(name, vtype, dimensions, **options)]
-        # NOTE: It fill the fill_value manually to overcome a base library bug.
-        for v in vars:
-            v[:] = fill_value
+        [v.set_auto_maskandscale(False) for v in vars]
         return vars
 
 
