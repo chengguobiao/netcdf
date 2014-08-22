@@ -60,6 +60,15 @@ root, is_new = nc.open(['file01.nc', 'file02.nc', 'file03.nc'])
 nc.close(root)
 ```
 
+Or you can use a **with** statement:
+
+```python
+from netcdf import netcdf as nc
+with nc.loader(['file01.nc', 'file02.nc', 'file03.nc']) as root:
+    # here you should write al the needed operations
+    pass
+```
+
 Also, it is compatible with **numpy**:
 
 ```python
