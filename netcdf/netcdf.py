@@ -2,6 +2,7 @@ from netCDF4 import Dataset, numpy
 import numpy as np
 import os
 from glob import glob
+from contextlib import contextmanager
 
 
 def flatten(x):
@@ -308,3 +309,10 @@ def close(root):
     root -- the root descriptor returned by the 'open' function
     """
     root.close()
+
+
+@contextmanager
+def loader(pattern):
+    root, _ = open(pattern)
+    yield root
+    close(root)
