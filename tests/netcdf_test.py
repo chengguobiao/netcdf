@@ -157,6 +157,19 @@ class TestNetcdf(unittest.TestCase):
         with self.assertRaisesRegexp(RuntimeError, u'NetCDF: Not a valid ID'):
             nc.close(root)
 
+    def test_open_close_using_with(self):
+        # check if open the pattern selection using using a package instance.
+        with nc.loader('unittest0*.nc') as root:
+            self.assertEquals(root.files,
+                              ['unittest0%i.nc' % i for i in range(5)])
+            self.assertEquals(root.pattern, 'unittest0*.nc')
+            self.assertEquals(len(root.roots), 5)
+            self.assertFalse(root.is_new)
+            self.assertFalse(root.read_only)
+        # check if close the package with all the files.
+        with self.assertRaisesRegexp(RuntimeError, u'NetCDF: Not a valid ID'):
+            nc.close(root)
+
     def test_get_existing_dim_single_file(self):
         # check if get the dimension in a single file.
         root = nc.open('unittest00.nc')[0]
@@ -286,8 +299,20 @@ class TestNetcdf(unittest.TestCase):
 
     def test_multiple_file_new_var_operations(self):
         # check if create a new var.
-        # check if value was saved into the file.
-        pass
+        root = nc.open('unittest0*.nc')[0]
+        var = nc.getvar(root, 'new_variable',
+                        'f4', ('time', 'yc', 'xc'),
+                        digits=3, fill_value=1.0)
+        self.assertEquals(var.__class__, nc.DistributedNCVariable)
+        self.assertEquals(var[:].__class__, np.ndarray)
+        tmp = var[:]
+        var[:] = var[:] + 1
+        nc.close(root)
+        # check if value was saved into the files.
+        root = nc.open('unittest00.nc')[0]
+        var = nc.getvar(root, 'new_variable')
+        self.assertTrue(var, tmp + 1)
+        nc.close(root)
 
     def test_character_variables_in_single_file(self):
         # check if get and set the numpy string matrix in single files.
