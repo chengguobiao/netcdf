@@ -61,6 +61,7 @@ class NCObject(object):
         self.roots = []
         self.variable_wrapper = lambda name, vars: name, vars
         self.create_dim = 'create_dimension'
+        self._read_only = True
 
     @property
     def is_new(self):
@@ -87,9 +88,9 @@ class NCObject(object):
                 if self.has_dimension(name)
                 else self.create_dimension(name, size))
 
-    def obtain_variable(self, *args):
-        raise Exception('Subclass responsability (should process %s' %
-                        str(args))
+    def obtain_variable(self, *args, **kwargs):
+        raise Exception('Subclass responsability (should process %s and %s)' %
+                        (str(args), str(kwargs)))
 
     def getvar(self, name, vtype='', dimensions=(), digits=0,
                fill_value=None, source=None):
@@ -111,14 +112,15 @@ class NCObject(object):
         # create dimensions if not exists.
         dims = source.dimensions
         gt1_or_none = lambda x: len(x) if len(x) > 1 else None
-        [self.getdim(d, gt1_or_none(dims[d])) for d in dims]
+        create_dim = lambda d: self.getdim(d, gt1_or_none(dims[d]))
+        map(create_dim, dims)
         dimensions = tuple(reversed([str(k)
                                      for k in source.dimensions.keys()]))
-        vt = vtype if vtype else source.vtype
+        vtype_tmp = vtype if vtype else source.vtype
         options = {'fill_value': 0.0}
-        if vt == 'f4':
+        if vtype_tmp == 'f4':
             options['digits'] = source.least_significant_digit
-        var = self.getvar(name, vt, dimensions, **options)
+        var = self.getvar(name, vtype_tmp, dimensions, **options)
         var[:] = source[:]
 
 
@@ -126,16 +128,19 @@ class NCFile(NCObject):
 
     def load(self):
         filename = self.files[0]
-        self.read_only = True
         try:
             self.roots = [(Dataset(filename, mode='w', format='NETCDF4')
-                          if self.is_new else Dataset(filename, mode='a',
-                                                      format='NETCDF4'))]
-            self.read_only = False
+                           if self.is_new else Dataset(filename, mode='a',
+                                                       format='NETCDF4'))]
+            self._read_only = False
         except Exception:
             self.roots = [Dataset(filename, mode='r', format='NETCDF4')]
         self.variable_wrapper = SingleNCVariable
         self.create_dim = 'createDimension'
+
+    @property
+    def read_only(self):
+        return self._read_only
 
     def obtain_variable(self, name, vtype='f4', dimensions=(), digits=0,
                         fill_value=None):
@@ -152,7 +157,8 @@ class NCFile(NCObject):
         if digits > 0:
             options['least_significant_digit'] = digits
         varstmp = [build(name, vtype, dimensions, **options)]
-        [v.set_auto_maskandscale(False) for v in varstmp]
+        not_auto_mask = lambda v: v.set_auto_maskandscale(False)
+        map(not_auto_mask, varstmp)
         return varstmp
 
 
@@ -194,9 +200,9 @@ class NCVariable(object):
 
     @property
     def least_significant_digit(self):
-        v = self.variables[0]
-        return (v.least_significant_digit
-                if hasattr(v, 'least_significant_digit') else 0)
+        variable = self.variables[0]
+        return (variable.least_significant_digit
+                if hasattr(variable, 'least_significant_digit') else 0)
 
     @property
     def dtype(self):
@@ -216,8 +222,8 @@ class NCVariable(object):
         ipdb.set_trace()
 
     def sync(self):
-        for v in self.variables:
-            v.group().sync()
+        for variable in self.variables:
+            variable.group().sync()
 
 
 class SingleNCVariable(NCVariable):
@@ -238,7 +244,7 @@ class SingleNCVariable(NCVariable):
 class DistributedNCVariable(NCVariable):
 
     def pack(self):
-        return np.vstack([v.pack() for v in self.variables])
+        return np.vstack([variable.pack() for variable in self.variables])
 
     def __setitem__(self, indexes, change):
         pack = self.pack()
