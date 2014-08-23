@@ -5,9 +5,9 @@ from glob import glob
 from contextlib import contextmanager
 
 
-def flatten(x):
+def flatten(lst):
     result = []
-    for el in x:
+    for el in lst:
         if hasattr(el, "__iter__") and not isinstance(el, str):
             result.extend(flatten(el))
         else:
@@ -87,18 +87,18 @@ class NCObject(object):
                 if self.has_dimension(name)
                 else self.create_dimension(name, size))
 
-    def obtain_variable(self, name, vtype='f4', dimensions=(), digits=0,
-                        fill_value=None):
-        raise Exception('Subclass responsability')
+    def obtain_variable(self, *args):
+        raise Exception('Subclass responsability (should process %s' %
+                        str(args))
 
     def getvar(self, name, vtype='', dimensions=(), digits=0,
                fill_value=None, source=None):
         if source:
             self.copy_in(name, vtype, source)
         if name not in self.variables.keys():
-            vars = self.obtain_variable(name, vtype, dimensions,
-                                        digits, fill_value)
-            self.variables[name] = self.variable_wrapper(name, vars)
+            varstmp = self.obtain_variable(name, vtype, dimensions,
+                                           digits, fill_value)
+            self.variables[name] = self.variable_wrapper(name, varstmp)
         return self.variables[name]
 
     def sync(self):
@@ -151,9 +151,9 @@ class NCFile(NCObject):
                    'fill_value': fill_value}
         if digits > 0:
             options['least_significant_digit'] = digits
-        vars = [build(name, vtype, dimensions, **options)]
-        [v.set_auto_maskandscale(False) for v in vars]
-        return vars
+        varstmp = [build(name, vtype, dimensions, **options)]
+        [v.set_auto_maskandscale(False) for v in varstmp]
+        return varstmp
 
 
 class NCPackage(NCObject):
@@ -226,10 +226,10 @@ class SingleNCVariable(NCVariable):
         return self.variables[0].group()
 
     def pack(self):
-        vars = self.variables[0]
+        varstmp = self.variables[0]
         if self.variables[0].shape[0] > 1:
-            vars = np.vstack([self.variables])
-        return vars
+            varstmp = np.vstack([self.variables])
+        return varstmp
 
     def __setitem__(self, indexes, changes):
         return self.variables[0].__setitem__(indexes, changes)
@@ -243,9 +243,9 @@ class DistributedNCVariable(NCVariable):
     def __setitem__(self, indexes, change):
         pack = self.pack()
         pack.__setitem__(indexes, change)
-        vars = np.vsplit(pack, pack.shape[0])
-        for i in range(len(vars)):
-            self.variables[i][:] = vars[i]
+        varstmp = np.vsplit(pack, pack.shape[0])
+        for i in range(len(varstmp)):
+            self.variables[i][:] = varstmp[i]
         self.sync()
 
 
