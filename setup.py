@@ -118,10 +118,11 @@ class Builder(object):
         if not os.path.isfile(self.local_filename):
             begin = datetime.now()
 
-            def dlProgress(count, blockSize, totalSize):
-                transfered = (count * blockSize
-                              if totalSize >= count * blockSize else totalSize)
-                progress = transfered * 100. / totalSize
+            def dl_progress(count, block_size, total_size):
+                transfered = (count * block_size
+                              if total_size >= count * block_size
+                              else total_size)
+                progress = transfered * 100. / total_size
                 speed = (transfered /
                          ((datetime.now() - begin).total_seconds())) / 1024
                 print '\r%s' % (' ' * 78),
@@ -132,7 +133,7 @@ class Builder(object):
             source = '%s/%s' % (url, filename)
             destiny = '%s%s' % (TMP_PATH, filename)
             self.local_filename, _ = urlretrieve(source, destiny,
-                                                 reporthook=dlProgress)
+                                                 reporthook=dl_progress)
 
     def uncompress(self):
         if not os.path.isdir(self.local_unpacked):

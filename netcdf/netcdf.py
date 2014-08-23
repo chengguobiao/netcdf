@@ -15,29 +15,29 @@ def flatten(lst):
     return result
 
 
-dtypes = {}
-dtypes[numpy.dtype('float32')] = 'f4'
-dtypes[numpy.dtype('int32')] = 'i4'
-dtypes[numpy.dtype('int8')] = 'i1'
-dtypes[numpy.dtype('S1')] = 'S1'
+DTYPES = {}
+DTYPES[numpy.dtype('float32')] = 'f4'
+DTYPES[numpy.dtype('int32')] = 'i4'
+DTYPES[numpy.dtype('int8')] = 'i1'
+DTYPES[numpy.dtype('S1')] = 'S1'
 
 
 class NCObject(object):
 
     @classmethod
-    def open(self, files_or_pattern):
-        files, pattern = self.distill(files_or_pattern)
-        o = self.choice_type(files)
-        o.pattern = pattern
-        o.load()
-        return o
+    def open(cls, files_or_pattern):
+        files, pattern = cls.distill(files_or_pattern)
+        obj = cls.choice_type(files)
+        obj.pattern = pattern
+        obj.load()
+        return obj
 
     @classmethod
-    def choice_type(self, files):
+    def choice_type(cls, files):
         return NCPackage(files) if len(files) > 1 else NCFile(files)
 
     @classmethod
-    def distill(self, files_or_pattern):
+    def distill(cls, files_or_pattern):
         if files_or_pattern in ['', []]:
             raise Exception('There is not file list or '
                             'pattern to open.')
@@ -210,7 +210,7 @@ class NCVariable(object):
 
     @property
     def vtype(self):
-        return dtypes[np.dtype(self.dtype)]
+        return DTYPES[np.dtype(self.dtype)]
 
     def __getitem__(self, indexes):
         return self.pack().__getitem__(indexes)

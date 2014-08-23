@@ -8,7 +8,7 @@ import numpy as np
 
 class TestNetcdf(unittest.TestCase):
 
-    def createRefFile(self, filename):
+    def create_ref_file(self, filename):
         ref = Dataset(
             filename,
             mode="w",
@@ -74,10 +74,10 @@ class TestNetcdf(unittest.TestCase):
         return ref
 
     def setUp(self):
-        self.refs = [self.createRefFile('unittest%s.nc' % (str(i).zfill(2)))
+        self.refs = [self.create_ref_file('unittest%s.nc' % (str(i).zfill(2)))
                      for i in range(5)]
         [ref.sync() for ref in self.refs]
-        self.ro_ref = self.createRefFile('ro_unittest.nc')
+        self.ro_ref = self.create_ref_file('ro_unittest.nc')
         self.ro_ref.sync()
 
     def tearDown(self):
