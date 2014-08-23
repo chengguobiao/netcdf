@@ -1,7 +1,8 @@
 netcdf
 ======
 
-[![Build Status](https://travis-ci.org/ecolell/netcdf.svg?branch=master)](https://travis-ci.org/ecolell/netcdf) [![Coverage Status](https://coveralls.io/repos/ecolell/netcdf/badge.png)](https://coveralls.io/r/ecolell/netcdf) [![Code Health](https://landscape.io/github/ecolell/netcdf/master/landscape.png)](https://landscape.io/github/ecolell/netcdf/master) [![PyPI version](https://badge.fury.io/py/netcdf.svg)](http://badge.fury.io/py/netcdf)
+[![License](https://pypip.in/license/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/) [![Downloads](https://pypip.in/download/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/) [![Build Status](https://travis-ci.org/ecolell/netcdf.svg?branch=master)](https://travis-ci.org/ecolell/netcdf) [![Coverage Status](https://coveralls.io/repos/ecolell/netcdf/badge.png)](https://coveralls.io/r/ecolell/netcdf) [![Code Health](https://landscape.io/github/ecolell/netcdf/master/landscape.png)](https://landscape.io/github/ecolell/netcdf/master) [![PyPI version](https://badge.fury.io/py/netcdf.svg)](http://badge.fury.io/py/netcdf)
+[![Supported Python versions](https://pypip.in/py_versions/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/)
 
 
 A python library that allow to use one or multiple NetCDF files in a transparent way through polimorphic methods.

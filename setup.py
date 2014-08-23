@@ -184,7 +184,7 @@ setup(
     author_email='eloy.colell@gmail.com',
     packages=['netcdf', ],
     url='https://github.com/ecolell/netcdf',
-    license='MIT License, see LICENCE.txt',
+    license='MIT',
     description='A python library that allow to use one or multiple NetCDF '
                 'files in a transparent way through polimorphic methods.',
     long_description=get_long_description(),
