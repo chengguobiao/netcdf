@@ -172,8 +172,8 @@ class build_wrapper(build):
     def initialize_options(self):
         # Deploy all the described libraries in the BINARIES dictionary.
         libs = sorted(BINARIES.keys())
-        build = lambda lib: Builder(lib).build()
-        map(build, libs)
+        build_lib = lambda lib: Builder(lib).build()
+        map(build_lib, libs)
         return build.initialize_options(self)
 
 
