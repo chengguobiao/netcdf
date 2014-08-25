@@ -61,15 +61,6 @@ root, is_new = nc.open(['file01.nc', 'file02.nc', 'file03.nc'])
 nc.close(root)
 ```
 
-Or you can use a **with** statement:
-
-```python
-from netcdf import netcdf as nc
-with nc.loader(['file01.nc', 'file02.nc', 'file03.nc']) as root:
-    # here you should write al the needed operations
-    pass
-```
-
 Also, it is compatible with **numpy**:
 
 ```python
@@ -106,6 +97,19 @@ print "Matrix shape: ", joined_data.shape
 nc.close(joined_root)
 nc.close(root)
 ```
+
+Or you can use a **with** statement to reduce the code and guarantee the call to the close function to save changes:
+
+```python
+from netcdf import netcdf as nc
+import numpy as np
+with nc.loader('new_file.nc') as joined_root:
+    with nc.loader(['file01.nc', 'file02.nc', 'file03.nc']) as root:
+        data = nc.getvar(root, 'data')
+        joined_data = nc.getvar(joined_root, 'copied_data', source=data)
+        joined_data[:] = joined_data[:] ** 3 + np.cos(joined_data[:]) * 2
+```
+
 
 About
 -----
