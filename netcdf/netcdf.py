@@ -7,11 +7,11 @@ from contextlib import contextmanager
 
 def flatten(lst):
     result = []
-    for el in lst:
-        if hasattr(el, "__iter__") and not isinstance(el, str):
-            result.extend(flatten(el))
+    for element in lst:
+        if hasattr(element, "__iter__") and not isinstance(element, str):
+            result.extend(flatten(element))
         else:
-            result.append(el)
+            result.append(element)
     return result
 
 

@@ -47,6 +47,16 @@ class TestNetcdf(unittest.TestCase):
             zlib=True,
             fill_value=0.0)
         var[0, :] = 1
+        var = ref.createVariable(
+            'auditTrail',
+            'S1',
+            dimensions=('auditCount', 'auditSize'),
+            zlib=True,
+            fill_value=0.0)
+        var[:] = self.auditTrail
+        return ref
+
+    def setUp(self):
         audit = np.array([['1', '4', '0', '0', '1', ' ', '2', '3', '2', '3',
                            '5', '2', ' ', 'I', 'M', 'G', 'C', 'O', 'P', 'Y',
                            ' ', 'D', 'E', 'L', 'I', 'V', 'E', 'R', 'Y', '/',
@@ -64,24 +74,14 @@ class TestNetcdf(unittest.TestCase):
                            'S', 'I', 'Z', 'E', '=', '1', '0', '6', '7', ' ',
                            '2', '1', '6', '6', ' ', ' ', ' ', ' ', ' ', ' ']])
         self.auditTrail = audit
-        var = ref.createVariable(
-            'auditTrail',
-            'S1',
-            dimensions=('auditCount', 'auditSize'),
-            zlib=True,
-            fill_value=0.0)
-        var[:] = self.auditTrail
-        return ref
-
-    def setUp(self):
         self.refs = [self.create_ref_file('unittest%s.nc' % (str(i).zfill(2)))
                      for i in range(5)]
-        [ref.sync() for ref in self.refs]
+        map(lambda ref: ref.sync(), self.refs)
         self.ro_ref = self.create_ref_file('ro_unittest.nc')
         self.ro_ref.sync()
 
     def tearDown(self):
-        [ref.close() for ref in self.refs]
+        map(lambda ref: ref.close(), self.refs)
         self.ro_ref.close()
         os.chmod('ro_unittest.nc', stat.S_IWRITE | stat.S_IRUSR |
                  stat.S_IRGRP | stat.S_IROTH)
@@ -90,12 +90,12 @@ class TestNetcdf(unittest.TestCase):
     def test_open_unexistent_file(self):
         with self.assertRaisesRegexp(Exception, u'There is not file list or '
                                      'pattern to open.'):
-            root, is_new = nc.open([])
+            nc.open([])
 
     def test_open_unexistent_pattern(self):
         with self.assertRaisesRegexp(Exception, u'There is not file list or '
                                      'pattern to open.'):
-            root, is_new = nc.open('')
+            nc.open('')
 
     def test_open_close_existent_file(self):
         # check if open an existent file.
