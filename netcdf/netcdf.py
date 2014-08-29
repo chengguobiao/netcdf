@@ -113,7 +113,7 @@ class NCObject(object):
         dims = source.dimensions
         gt1_or_none = lambda x: len(x) if len(x) > 1 else None
         create_dim = lambda d: self.getdim(d, gt1_or_none(dims[d]))
-        map(create_dim, dims)
+        list(map(create_dim, dims))
         dimensions = tuple(reversed([str(k)
                                      for k in source.dimensions.keys()]))
         vtype_tmp = vtype if vtype else source.vtype
@@ -158,7 +158,7 @@ class NCFile(NCObject):
             options['least_significant_digit'] = digits
         varstmp = [build(name, vtype, dimensions, **options)]
         not_auto_mask = lambda v: v.set_auto_maskandscale(False)
-        map(not_auto_mask, varstmp)
+        list(map(not_auto_mask, varstmp))
         return varstmp
 
 

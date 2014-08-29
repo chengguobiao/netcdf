@@ -76,12 +76,12 @@ class TestNetcdf(unittest.TestCase):
         self.auditTrail = audit
         self.refs = [self.create_ref_file('unittest%s.nc' % (str(i).zfill(2)))
                      for i in range(5)]
-        map(lambda ref: ref.sync(), self.refs)
+        list(map(lambda ref: ref.sync(), self.refs))
         self.ro_ref = self.create_ref_file('ro_unittest.nc')
         self.ro_ref.sync()
 
     def tearDown(self):
-        map(lambda ref: ref.close(), self.refs)
+        list(map(lambda ref: ref.close(), self.refs))
         self.ro_ref.close()
         os.chmod('ro_unittest.nc', stat.S_IWRITE | stat.S_IRUSR |
                  stat.S_IRGRP | stat.S_IROTH)
