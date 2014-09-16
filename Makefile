@@ -40,7 +40,7 @@ test:
 
 shell:
 	@ $(SOURCE_ACTIVATE) ipython
-	@ echo "[ tested       ] the system was completly tested"
+	@ echo "[ shell        ] the system was completly closed"
 
 test-coverage-travis-ci:
 	@ $(SOURCE_ACTIVATE) coverage run --source='netcdf/' tests/netcdf_test.py
