@@ -3,4 +3,5 @@ test-warnings: yes
 strictness: veryhigh
 max-line-length: 300
 autodetect: yes
-ignore-patterns: ^version.py$
+ignore-patterns:
+    - version.py
