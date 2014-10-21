@@ -4,4 +4,4 @@ strictness: veryhigh
 max-line-length: 300
 autodetect: yes
 ignore-patterns:
-    - version.py
+    - ^version\.py$
