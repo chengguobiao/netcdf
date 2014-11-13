@@ -286,6 +286,7 @@ class TestNetcdf(unittest.TestCase):
         var = nc.getvar(root, 'new_variable',
                         'f4', ('time', 'yc', 'xc'),
                         digits=3, fill_value=1.0)
+        self.assertTrue((var[:] == 1.0).all())
         self.assertEquals(var.__class__, nc.SingleNCVariable)
         self.assertEquals(var[:].__class__, np.ndarray)
         tmp = var[:]
@@ -294,7 +295,7 @@ class TestNetcdf(unittest.TestCase):
         # check if value was saved into the file.
         root = nc.open('unittest00.nc')[0]
         var = nc.getvar(root, 'new_variable')
-        self.assertTrue(var, tmp + 1)
+        self.assertEquals(var, tmp + 1)
         nc.close(root)
 
     def test_multiple_file_new_var_operations(self):
@@ -303,6 +304,7 @@ class TestNetcdf(unittest.TestCase):
         var = nc.getvar(root, 'new_variable',
                         'f4', ('time', 'yc', 'xc'),
                         digits=3, fill_value=1.0)
+        self.assertTrue((var[:] == 1.0).all())
         self.assertEquals(var.__class__, nc.DistributedNCVariable)
         self.assertEquals(var[:].__class__, np.ndarray)
         tmp = var[:]
@@ -311,7 +313,7 @@ class TestNetcdf(unittest.TestCase):
         # check if value was saved into the files.
         root = nc.open('unittest00.nc')[0]
         var = nc.getvar(root, 'new_variable')
-        self.assertTrue(var, tmp + 1)
+        self.assertEquals(var, tmp + 1)
         nc.close(root)
 
     def test_character_variables_in_single_file(self):
