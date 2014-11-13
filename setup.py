@@ -36,7 +36,7 @@ TMP_PATH = '/tmp/'
 OS_NAME = p.system()
 BINARIES = {
     'hdf5': {
-        'version': '1.8.12',
+        'version': '1.8.13',
         'name': 'hdf5-%s',
         'url': 'http://www.hdfgroup.org/ftp/HDF5/releases/%s/src',
         'compile': {
