@@ -1,7 +1,7 @@
 netcdf
 ======
 
-[![License](https://pypip.in/license/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/) [![Downloads](https://pypip.in/download/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/) [![Build Status](https://travis-ci.org/ecolell/netcdf.svg?branch=master)](https://travis-ci.org/ecolell/netcdf) [![Coverage Status](https://coveralls.io/repos/ecolell/netcdf/badge.png)](https://coveralls.io/r/ecolell/netcdf) [![Code Health](https://landscape.io/github/ecolell/netcdf/master/landscape.png)](https://landscape.io/github/ecolell/netcdf/master) [![PyPI version](https://badge.fury.io/py/netcdf.svg)](http://badge.fury.io/py/netcdf)
+[![License](https://pypip.in/license/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/) [![Downloads](https://pypip.in/download/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/) [![Build Status](https://travis-ci.org/gersolar/netcdf.svg?branch=master)](https://travis-ci.org/gersolar/netcdf) [![Coverage Status](https://coveralls.io/repos/gersolar/netcdf/badge.png)](https://coveralls.io/r/gersolar/netcdf) [![Code Health](https://landscape.io/github/gersolar/netcdf/master/landscape.png)](https://landscape.io/github/gersolar/netcdf/master) [![PyPI version](https://badge.fury.io/py/netcdf.svg)](http://badge.fury.io/py/netcdf)
 [![Supported Python versions](https://pypip.in/py_versions/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/)
 
 
@@ -15,11 +15,11 @@ If you want to use this library on any GNU/Linux or OSX system you just need to 
 
     $ pip install netcdf
 
-If you want to improve this library, you should download the [github repository](https://github.com/ecolell/netcdf) and execute:
+If you want to improve this library, you should download the [github repository](https://github.com/gersolar/netcdf) and execute:
 
     $ make deploy
 
-This library is builded over two **C libraries** (named **libhdf5** and **libnetcdf** in *aptitude*). To provide a cross-platform installation, the [setup.py](https://github.com/ecolell/netcdf/blob/master/setup.py) is going to require the **sudo** password to automate the installation of these two libraries.
+This library is builded over two **C libraries** (named **libhdf5** and **libnetcdf** in *aptitude*). To provide a cross-platform installation, the [setup.py](https://github.com/gersolar/netcdf/blob/master/setup.py) is going to require the **sudo** password to automate the installation of these two libraries.
 
 On Ubuntu Desktop there are some other libraries not installed by default (zlibc curl libssl0.9.8 libbz2-dev libxslt*-dev libxml*-dev) which may need to be installed to use these library. Use the next command to automate the installation of the additional C libraries:
 
@@ -33,7 +33,7 @@ To test all the project you should use the command:
 
     $ make test
 
-If you want to help us or report an issue join to us through the [GitHub issue tracker](https://github.com/ecolell/netcdf/issues).
+If you want to help us or report an issue join to us through the [GitHub issue tracker](https://github.com/gersolar/netcdf/issues).
 
 
 Example
