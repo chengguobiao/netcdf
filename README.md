@@ -4,7 +4,7 @@ netcdf
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gersolar/netcdf?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![License](https://pypip.in/license/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/) [![Downloads](https://pypip.in/download/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/) [![Build Status](https://travis-ci.org/gersolar/netcdf.svg?branch=master)](https://travis-ci.org/gersolar/netcdf) [![Coverage Status](https://coveralls.io/repos/gersolar/netcdf/badge.png)](https://coveralls.io/r/gersolar/netcdf) [![Code Health](https://landscape.io/github/gersolar/netcdf/master/landscape.png)](https://landscape.io/github/gersolar/netcdf/master) [![PyPI version](https://badge.fury.io/py/netcdf.svg)](http://badge.fury.io/py/netcdf)
-[![Supported Python versions](https://pypip.in/py_versions/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/)
+[![Supported Python versions](https://pypip.in/py_versions/netcdf/badge.svg)](https://pypi.python.org/pypi/netcdf/) [![Stories in Ready](https://badge.waffle.io/gersolar/netcdf.png?label=ready&title=Ready)](https://waffle.io/gersolar/netcdf)
 
 
 A python library that allow to use one or multiple NetCDF files in a transparent way through polimorphic methods.
