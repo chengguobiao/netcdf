@@ -5,10 +5,14 @@ from distutils.command.build import build
 from setuptools.command import easy_install
 import os
 import subprocess
-from pip.req import parse_requirements
 from urllib import urlretrieve
 from datetime import datetime
 import sys
+
+
+def parse_requirements(filename):
+    return list(filter(lambda line: (line.strip())[0] != '#',
+                       [line.strip() for line in open(filename).readlines()]))
 
 
 def calculate_version():
@@ -29,7 +33,7 @@ def calculate_version():
     return git_version
 
 
-REQUIREMENTS = [str(ir.req) for ir in parse_requirements('requirements.txt')]
+REQUIREMENTS = parse_requirements('requirements.txt')
 VERSION_GIT = calculate_version()
 import platform as p
 TMP_PATH = '/tmp/'
@@ -146,12 +150,12 @@ class Builder(object):
             self.call('chmod -R ugo+rwx %s*' % self.local_unpacked)
 
     def build(self):
+        depends = self.lib['compile']['depends']
+        install = lambda dep: easy_install.main(['-U', dep])
+        map(install, depends)
         filename = SYSTEMS[OS_NAME]['libs'][self.lib_key]
         if not os.path.isfile(filename):
             self.uncompress()
-            depends = self.lib['compile']['depends']
-            install = lambda dep: easy_install.main(['-U', dep])
-            map(install, depends)
             title = '%s %s' % (OS_NAME, p.architecture()[0])
             spacer = '-' * len(title)
             print '+%s+\n|%s|\n+%s+' % (spacer, title, spacer)
