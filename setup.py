@@ -185,9 +185,9 @@ setup(
     name='netcdf',
     version=VERSION_GIT,
     author=u'Eloy Adonis Colell',
-    author_email='eloy.colell@gmail.com',
+    author_email='gersolar.dev@gmail.com',
     packages=['netcdf', ],
-    url='https://github.com/ecolell/netcdf',
+    url='https://github.com/gersolar/netcdf',
     license='MIT',
     description='A python library that allow to use one or multiple NetCDF '
                 'files in a transparent way through polimorphic methods.',
