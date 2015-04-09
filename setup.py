@@ -52,7 +52,7 @@ BINARIES = {
         },
     },
     'netcdf': {
-        'version': '4.3.1-rc4',
+        'version': '4.3.3',
         'name': 'netcdf-%s',
         'url': 'ftp://ftp.unidata.ucar.edu/pub/netcdf',
         'compile': {
