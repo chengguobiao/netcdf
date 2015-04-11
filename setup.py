@@ -36,7 +36,7 @@ def calculate_version():
 REQUIREMENTS = parse_requirements('requirements.txt')
 VERSION_GIT = calculate_version()
 import platform as p
-TMP_PATH = '/tmp/'
+TMP_PATH = './'
 OS_NAME = p.system()
 BINARIES = {
     'hdf5': {

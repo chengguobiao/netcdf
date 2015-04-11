@@ -4,6 +4,8 @@ __pycache__/
 
 # C extensions
 *.so
+netcdf*/
+hdf5*/
 
 # Distribution / packaging
 .Python
@@ -21,6 +23,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+*.tar.gz
 
 # Installer logs
 pip-log.txt
