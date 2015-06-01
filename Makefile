@@ -35,7 +35,7 @@ show-version:
 	@ $(SOURCE_ACTIVATE) $(PYTHON) --version
 
 test:
-	@ $(SOURCE_ACTIVATE) $(PYTHON) tests/netcdf_test.py
+	@ $(SOURCE_ACTIVATE) $(PYTHON) tests
 	@ echo "[ tested       ] the system was completly tested"
 
 shell:
