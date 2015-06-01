@@ -72,7 +72,7 @@ pypitest-upload: test
 
 clean:
 	@ echo "[ cleaning     ] remove deployment generated files that doesn't exists in the git repository"
-	@ rm -rf MANIFEST virtualenv* hdf5*/ netcdf*/ bin/ lib/ lib64 include/ build/ share setuptools-*.tar.gz get-pip.py tracking.log subversion .Python
+	@ rm -rf MANIFEST virtualenv* hdf5-*/ netcdf-*/ bin/ lib/ lib64 include/ build/ share setuptools-*.tar.gz get-pip.py tracking.log subversion .Python
 
 hardclean:
 	@ echo "[ cleaning     ] remove the netcdf4 and hdf5 C libraries from /usr/local/lib"
