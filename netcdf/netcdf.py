@@ -319,6 +319,13 @@ def close(root):
 
 @contextmanager
 def loader(pattern):
+    """
+    It provide a root descriptor to be used inside a with statement. It
+    automatically close the root when the with statement finish.
+
+    Keyword arguments:
+    root -- the root descriptor returned by the 'open' function
+    """
     root, _ = open(pattern)
     yield root
     close(root)

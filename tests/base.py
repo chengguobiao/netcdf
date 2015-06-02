@@ -45,7 +45,7 @@ class TestCase(unittest.TestCase):
             dimensions=('time', 'yc', 'xc'),
             zlib=True,
             fill_value=0.0)
-        var[0, :] = 1
+        var[:] = self.data
         var = ref.createVariable(
             'auditTrail',
             'S1',
@@ -73,6 +73,8 @@ class TestCase(unittest.TestCase):
                            'S', 'I', 'Z', 'E', '=', '1', '0', '6', '7', ' ',
                            '2', '1', '6', '6', ' ', ' ', ' ', ' ', ' ', ' ']])
         self.auditTrail = audit
+        values = map(lambda x: x/2., range(5, 20))
+        self.data = np.random.choice(values, (1, 100, 200))
         self.refs = [self.create_ref_file('unittest%s.nc' % (str(i).zfill(2)))
                      for i in range(5)]
         list(map(lambda ref: ref.sync(), self.refs))

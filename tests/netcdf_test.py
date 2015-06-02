@@ -125,7 +125,7 @@ class TestNetcdf(tests.base.TestCase):
         var = nc.getvar(root, 'data')
         self.assertEquals(var.shape, (1, 100, 200))
         self.assertIn('data', root.variables)
-        are_equals = (var[:] == np.zeros(var.shape) + 1.)
+        are_equals = (var[:] == self.data)
         self.assertTrue(are_equals.all())
         nc.close(root)
 
@@ -151,7 +151,7 @@ class TestNetcdf(tests.base.TestCase):
         var = nc.getvar(root, 'data')
         self.assertEquals(var.shape, (5, 100, 200))
         self.assertIn('data', root.variables)
-        are_equals = (var[:] == np.zeros(var.shape) + 1.)
+        are_equals = (var[:] == self.data)
         self.assertTrue(are_equals.all())
         nc.close(root)
 
