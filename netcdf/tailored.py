@@ -1,0 +1,132 @@
+from netcdf import open as nc_open
+import json
+import os
+from contextlib import contextmanager
+
+
+class TileAdapter(object):
+
+    def __init__(self, manager, variable):
+        self.manager = manager
+        self.variable = variable
+
+    def normalized_index(self, indexes, names):
+        cls = indexes.__class__
+        s = lambda i: slice(indexes[i], indexes[i]+1, 1)
+        answers = {
+            slice: [indexes],
+            list: indexes,
+        }
+        sub_i = (lambda i: slice(i, i + 1, None) if isinstance(i, int) else i)
+        indexes = answers[cls] if cls in answers else map(sub_i, list(indexes))
+        indexes += map(lambda i: slice(None), range(len(names) - len(indexes)))
+        return indexes
+
+    @property
+    def distributed_dim(self):
+        return self.manager.distributed_dim
+
+    def dimensions_names(self):
+        dims = dict(map(lambda (k, v): (len(v), k),
+                        self.variable.dimensions.items()))
+        names = filter(lambda n: n,
+                       map(lambda sh: dims[sh] if sh in dims
+                           else self.distributed_dim,
+                           self.variable.shape))
+        names = sorted(set(names), key=lambda x: names.index(x))
+        return names
+
+    def adjust_index(self, args):
+        a = lambda n, m: m + n if n and n < 0 else n
+        to_l = lambda s: [s.start, s.stop, s.step]
+        index, tail_limits, dim_limits = to_l(args[0]), to_l(args[1]), list(args[2])
+        absolute = lambda n: dim_limits[1] + n if n and n < 0 else n
+        tail_limits = map(absolute, tail_limits)
+        fix = lambda t: (dim_limits[1]
+                         if t > dim_limits[1] else
+                         (dim_limits[0] if t < dim_limits[0] else t))
+        tail_limits = map(fix, tail_limits)
+        index = map(lambda i: i if i else 0, index)
+        index[0] = tail_limits[0] + index[0]
+        index[1] = (tail_limits[0] + index[1]
+                    if index[1] > 0 else tail_limits[1] + index[1])
+        return slice(index[0], index[1], index[2] if index[2] else 1)
+
+    def transform(self, indexes):
+        names = self.dimensions_names()
+        shapes = list(self.variable.shape)
+        get_slice = lambda n: slice(*self.manager.dimensions[n])
+        limits = map(lambda n: get_slice(n if n in self.manager.dimensions
+                                         else self.distributed_dim), names)
+        var_limits = zip([0] * len(shapes), shapes)
+        related = zip(self.normalized_index(indexes, names), limits, var_limits)
+        indexes = map(self.adjust_index, related)
+        # TODO: Adapt index selection.
+        if len(indexes) < len(shapes) and shapes[0] is 1:
+            indexes.insert(0, slice(None))
+        return tuple(indexes)
+
+    def __setitem__(self, indexes, changes):
+        indexes = self.transform(indexes)
+        output = self.variable.__setitem__(indexes, changes)
+        return output
+
+    def __getitem__(self, indexes):
+        indexes = self.transform(indexes)
+        return self.variable.__getitem__(indexes)
+
+    @property
+    def name(self):
+        return self.variable.name
+
+    @property
+    def shape(self):
+        return self[:].shape
+
+    @property
+    def vtype(self):
+        print 'vtype: %s' % self.variable.vtype
+        return self.variable.vtype
+
+    @property
+    def least_significant_digit(self):
+        print 'least_significant_digit: %s' % self.variable.least_significant_digit
+        return self.variable.least_significant_digit
+
+
+class TileManager(object):
+
+    def __init__(self, pattern_or_root, dimensions=None, distributed_dim=None):
+        if isinstance(pattern_or_root, str):
+            pattern_or_root = nc_open(pattern_or_root)[0]
+        self.root = pattern_or_root
+        self.distributed_dim=distributed_dim
+        self.dimensions = dimensions if dimensions else {}
+
+    def getvar(self, *args, **kwargs):
+        var = self.root.getvar(*args, **kwargs)
+        return TileAdapter(self, var)
+
+    def sync(self):
+        self.root.sync()
+
+    def close(self):
+        self.root.close()
+
+    @property
+    def read_only(self):
+        return self.root.read_only
+
+
+def tailor(pattern_or_root, dimensions=None, distributed_dim='time'):
+    """
+    Return a TileManager to wrap the root descriptor and tailor all the dimensions
+    to a specified window.
+
+    Keyword arguments:
+    root -- a NCObject descriptor.
+    pattern -- a filename string to open a NCObject descriptor.
+    dimensions -- a dictionary to configurate the dimensions limits.
+    """
+    return TileManager(pattern_or_root, dimensions=dimensions,
+                       distributed_dim=distributed_dim)

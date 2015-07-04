@@ -250,6 +250,8 @@ class DistributedNCVariable(NCVariable):
         pack = self.pack()
         pack.__setitem__(indexes, change)
         varstmp = np.vsplit(pack, pack.shape[0])
+        if not isinstance(indexes, slice):
+            indexes = tuple(list(indexes)[1:])
         for i in range(len(varstmp)):
             self.variables[i][:] = varstmp[i]
         self.sync()
@@ -317,8 +319,11 @@ def close(root):
     root.close()
 
 
+from tailored import tailor
+
+
 @contextmanager
-def loader(pattern):
+def loader(pattern, dimensions=None, distributed_dim='time'):
     """
     It provide a root descriptor to be used inside a with statement. It
     automatically close the root when the with statement finish.
@@ -326,6 +331,9 @@ def loader(pattern):
     Keyword arguments:
     root -- the root descriptor returned by the 'open' function
     """
-    root, _ = open(pattern)
+    if dimensions:
+        root = tailor(pattern, dimensions, distributed_dim)
+    else:
+        root, _ = open(pattern)
     yield root
-    close(root)
+    root.close()

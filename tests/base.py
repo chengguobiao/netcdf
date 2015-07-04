@@ -75,6 +75,10 @@ class TestCase(unittest.TestCase):
         self.auditTrail = audit
         values = map(lambda x: x/2., range(5, 20))
         self.data = np.random.choice(values, (1, 100, 200))
+        # Append a static square for a visible control.
+        x = 5
+        self.data[0:1,x:x+10,x:x+10] = 2.5
+        # Create the files.
         self.refs = [self.create_ref_file('unittest%s.nc' % (str(i).zfill(2)))
                      for i in range(5)]
         list(map(lambda ref: ref.sync(), self.refs))
