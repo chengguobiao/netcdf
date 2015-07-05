@@ -112,6 +112,22 @@ with nc.loader('new_file.nc') as joined_root:
         joined_data[:] = joined_data[:] ** 3 + np.cos(joined_data[:]) * 2
 ```
 
+You can also use a tiled access to the data through:
+
+```python
+from netcdf import netcdf as nc
+import numpy as np
+dims = {
+    'xc': [20,-20],
+    'yc': [10,50],
+    'time': [-30, None]
+}
+
+with nc.loader(file0*.nc', dimensions=dims) as root:
+    data = nc.getvar(root, 'data')
+    print data.shape
+```
+
 
 About
 -----
