@@ -100,7 +100,7 @@ nc.close(joined_root)
 nc.close(root)
 ```
 
-Or you can use a **with** statement to reduce the code and guarantee the call to the close function to save changes:
+Also, it can use a **with** statement to reduce the code and guarantee the call to the close function to save changes:
 
 ```python
 from netcdf import netcdf as nc
@@ -112,7 +112,7 @@ with nc.loader('new_file.nc') as joined_root:
         joined_data[:] = joined_data[:] ** 3 + np.cos(joined_data[:]) * 2
 ```
 
-You can also use a tiled access to the data through:
+Last, it can use a tiled access to the data through:
 
 ```python
 from netcdf import netcdf as nc
