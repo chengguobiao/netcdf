@@ -112,7 +112,8 @@ class NCObject(object):
         # create dimensions if not exists.
         dims = source.dimensions
         gt1_or_none = lambda x: len(x) if len(x) > 1 else None
-        create_dim = lambda d: self.getdim(d, gt1_or_none(dims[d]))
+        create_dim = lambda d: self.getdim(d, None if d is u'time'
+                                           else gt1_or_none(dims[d]))
         list(map(create_dim, dims))
         dimensions = tuple(reversed([str(k)
                                      for k in source.dimensions.keys()]))
@@ -121,7 +122,7 @@ class NCObject(object):
         if vtype_tmp == 'f4':
             options['digits'] = source.least_significant_digit
         var = self.getvar(name, vtype_tmp, dimensions, **options)
-        var[:] = source[:]
+        source.copy_to(var)
 
 
 class NCFile(NCObject):
@@ -224,6 +225,9 @@ class NCVariable(object):
     def sync(self):
         for variable in self.variables:
             variable.group().sync()
+
+    def copy_to(self, var):
+        var[:] = self[:]
 
 
 class SingleNCVariable(NCVariable):

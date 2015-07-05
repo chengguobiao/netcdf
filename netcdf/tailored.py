@@ -76,22 +76,15 @@ class TileAdapter(object):
         return self.variable.__getitem__(indexes)
 
     @property
-    def name(self):
-        return self.variable.name
-
-    @property
     def shape(self):
         return self[:].shape
 
-    @property
-    def vtype(self):
-        print 'vtype: %s' % self.variable.vtype
-        return self.variable.vtype
+    def copy_to(self, var):
+        indexes = self.transform(slice(None, None, None))
+        var[indexes] = self[:]
 
-    @property
-    def least_significant_digit(self):
-        print 'least_significant_digit: %s' % self.variable.least_significant_digit
-        return self.variable.least_significant_digit
+    def __getattr__(self, name):
+        return getattr(self.variable, name)
 
 
 class TileManager(object):

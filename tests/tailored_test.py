@@ -108,13 +108,40 @@ class TestTailored(tests.base.TestCase):
             self.assertTrue((t_data[:] == 1.5).all())
             self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
-        import os
-        if os.path.exists('back'):
-            os.system('cp -f unittest0* back/')
         with nc.loader('unittest0*.nc') as root:
             data = nc.getvar(root, 'new_data')
             self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
+
+    def test_getvar_source_to_single_file(self):
+        dims = self.dimensions
+        # TODO: It should spread the dimensions limits from the source.
+        with nc.loader('unittest_other.nc') as new_root:
+            with nc.loader('unittest0*.nc', dimensions=dims) as t_root:
+                t_data = nc.getvar(t_root, 'data')
+                data = nc.getvar(new_root, 'new_data', source=t_data)
+                self.assertEquals(t_data.shape, (3, 40, 160))
+                self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
+                self.assertTrue((t_data[:] == data[0,:3,10:50,20:-20]).all())
+                # The random values goes from 2.5 to 10 with 0.5 steps.
+                data[0:2, -30:-20, -10:-5] = 1.5
+                self.assertTrue((data[:] != 1.5).any())
+
+    def test_getvar_source_to_multiple_files(self):
+        dims = self.dimensions
+        self.mult = [self.create_ref_file('unittest_ot%s.nc' % (str(i).zfill(2)))
+                     for i in range(5)]
+        # TODO: It should spread the dimensions limits from the source.
+        with nc.loader('unittest_ot0*.nc') as new_root:
+            with nc.loader('unittest0*.nc', dimensions=dims) as t_root:
+                t_data = nc.getvar(t_root, 'data')
+                data = nc.getvar(new_root, 'new_data', source=t_data)
+                self.assertEquals(t_data.shape, (3, 40, 160))
+                self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
+                self.assertTrue((t_data[:] == data[:3,10:50,20:-20]).all())
+                # The random values goes from 2.5 to 10 with 0.5 steps.
+                data[0:2, -30:-20, -10:-5] = 1.5
+                self.assertTrue((data[:] != 1.5).any())
 
     def test_specific_subindex_support(self):
         dims = self.dimensions
@@ -129,9 +156,6 @@ class TestTailored(tests.base.TestCase):
             self.assertTrue((t_data[0:2, 10, 3] == 1.5).all())
             self.assertTrue((data[0:2, 20, 23] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
-        import os
-        if os.path.exists('back'):
-            os.system('cp -f unittest0* back/')
         with nc.loader('unittest0*.nc') as root:
             data = nc.getvar(root, 'data')
             self.assertTrue((data[0, 20, 23] == 1.5).all())
