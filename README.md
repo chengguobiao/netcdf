@@ -123,7 +123,7 @@ dims = {
     'time': [-30, None]
 }
 
-with nc.loader(file0*.nc', dimensions=dims) as root:
+with nc.loader('file0*.nc', dimensions=dims) as root:
     data = nc.getvar(root, 'data')
     print data.shape
 ```
