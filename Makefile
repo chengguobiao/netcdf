@@ -45,7 +45,7 @@ shell:
 	@ echo "[ shell        ] the system was completly closed"
 
 test-coverage-travis-ci:
-	@ $(SOURCE_ACTIVATE) coverage run --source='netcdf/' tests/netcdf_test.py tests/tailored_test.py
+	@ $(SOURCE_ACTIVATE) coverage run --source='netcdf/' tests/__main__.py
 
 test-coveralls:
 	@ $(SOURCE_ACTIVATE) coveralls

@@ -162,9 +162,6 @@ class TestTailored(tests.base.TestCase):
             self.assertTrue((data[:] != 1.5).any())
 
 
-if __name__ == '__main__':
-        tests.base.main()
-
 
 if __name__ == '__main__':
         tests.base.main()
