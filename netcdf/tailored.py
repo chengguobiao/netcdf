@@ -68,13 +68,23 @@ class TileAdapter(object):
             indexes.insert(0, slice(None))
         return tuple(indexes)
 
-    def __setitem__(self, indexes, changes):
+    def translate(self, indexes):
         indexes = self.transform(indexes)
-        output = self.variable.__setitem__(indexes, changes)
-        return output
+        limits = self.transform(slice(None))
+        outside = lambda (l, i): (l.start and l.stop and
+                                 (l.start > i.start or i.stop > l.stop))
+        wrong = filter(outside, zip(limits, indexes))
+        if wrong:
+            raise Exception('Overflow: Index outside of the tile dimensions.')
+        return indexes
+
+
+    def __setitem__(self, indexes, changes):
+        indexes = self.translate(indexes)
+        return self.variable.__setitem__(indexes, changes)
 
     def __getitem__(self, indexes):
-        indexes = self.transform(indexes)
+        indexes = self.translate(indexes)
         return self.variable.__getitem__(indexes)
 
     @property

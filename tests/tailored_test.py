@@ -161,6 +161,42 @@ class TestTailored(tests.base.TestCase):
             self.assertTrue((data[0, 20, 23] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
 
+    def test_specific_subindex_overflow_warning(self):
+        dims = self.dimensions
+        dims['time'] = [1, 3]
+        with nc.loader('unittest0*.nc', dimensions=dims) as t_root:
+            t_data = nc.getvar(t_root, 'data')
+            data = nc.getvar(t_root.root, 'data')
+            self.assertEquals(data.shape, (5, 100, 200))
+            self.assertEquals(t_data.shape, (2, 40, 160))
+            self.assertEquals(nc.getvar(t_root, 'time').shape, (2, 1))
+            # The random values goes from 2.5 to 10 with 0.5 steps.
+            with self.assertRaisesRegexp(Exception,
+                                         'Overflow: Index outside of the tile '
+                                         'dimensions.'):
+                t_data[1:3, 10, 30] = 1.5
+            with self.assertRaisesRegexp(Exception,
+                                         'Overflow: Index outside of the tile '
+                                         'dimensions.'):
+                t_data[1:2, -41, 30] = 1.5
+            with self.assertRaisesRegexp(Exception,
+                                         'Overflow: Index outside of the tile '
+                                         'dimensions.'):
+                t_data[1:2, 10, -161] = 1.5
+            with self.assertRaisesRegexp(Exception,
+                                         'Overflow: Index outside of the tile '
+                                         'dimensions.'):
+                t_data[-3:-1, -10, -30] = 1.5
+            with self.assertRaisesRegexp(Exception,
+                                         'Overflow: Index outside of the tile '
+                                         'dimensions.'):
+                t_data[-2:, 41, -30] = 1.5
+            with self.assertRaisesRegexp(Exception,
+                                         'Overflow: Index outside of the tile '
+                                         'dimensions.'):
+                t_data[-2:, -10, 161] = 1.5
+            self.assertTrue((t_data[:] != 1.5).all())
+
     def test_getvar_with_incomplete_limited_dimensions(self):
         self.dimensions.pop('time', None)
         root = nc.open('unittest0*.nc')[0]
