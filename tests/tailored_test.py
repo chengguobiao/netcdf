@@ -161,6 +161,27 @@ class TestTailored(tests.base.TestCase):
             self.assertTrue((data[0, 20, 23] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
 
+    def test_getvar_with_incomplete_limited_dimensions(self):
+        self.dimensions.pop('time', None)
+        root = nc.open('unittest0*.nc')[0]
+        t_root = nc.tailor(root, dimensions=self.dimensions)
+        t_data = nc.getvar(t_root, 'data')
+        data = nc.getvar(root, 'data')
+        nc.sync(root)
+        self.assertEquals(data.shape, (5, 100, 200))
+        self.assertEquals(t_data.shape, (5, 40, 160))
+        self.assertEquals(nc.getvar(t_root, 'time').shape, (5, 1))
+        self.assertTrue((t_data[:] == data[:,10:50,20:-20]).all())
+        # The random values goes from 2.5 to 10 with 0.5 steps.
+        t_data[:] = 1.5
+        self.assertTrue((t_data[:] == 1.5).all())
+        self.assertTrue((data[:,10:50,20:-20] == 1.5).all())
+        self.assertTrue((data[:] != 1.5).any())
+        nc.close(t_root)
+        with nc.loader('unittest0*.nc') as root:
+            data = nc.getvar(root, 'data')
+            self.assertTrue((data[:,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:] != 1.5).any())
 
 
 if __name__ == '__main__':

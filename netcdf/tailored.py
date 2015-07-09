@@ -41,6 +41,8 @@ class TileAdapter(object):
         to_l = lambda s: [s.start, s.stop, s.step]
         index, tail_limits, dim_limits = to_l(args[0]), to_l(args[1]), list(args[2])
         absolute = lambda n: dim_limits[1] + n if n and n < 0 else n
+        if tail_limits == [None, None, None]:
+            tail_limits = dim_limits + tail_limits[2:]
         tail_limits = map(absolute, tail_limits)
         fix = lambda t: (dim_limits[1]
                          if t > dim_limits[1] else
@@ -55,7 +57,7 @@ class TileAdapter(object):
     def transform(self, indexes):
         names = self.dimensions_names()
         shapes = list(self.variable.shape)
-        get_slice = lambda n: slice(*self.manager.dimensions[n])
+        get_slice = lambda n: slice(*self.manager.dimensions.get(n, [None]))
         limits = map(lambda n: get_slice(n if n in self.manager.dimensions
                                          else self.distributed_dim), names)
         var_limits = zip([0] * len(shapes), shapes)
