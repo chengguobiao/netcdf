@@ -1,6 +1,7 @@
 import tests.base
 import netcdf as nc
 import numpy as np
+from glob import glob
 
 
 class TestTailored(tests.base.TestCase):
@@ -57,6 +58,26 @@ class TestTailored(tests.base.TestCase):
 
     def test_compact_multiple_files(self):
         t_root = nc.tailor('unittest0*.nc', dimensions=self.dimensions)
+        t_data = nc.getvar(t_root, 'data')
+        data = nc.getvar(t_root.root, 'data')
+        self.assertEquals(data.shape, (5, 100, 200))
+        self.assertEquals(t_data.shape, (3, 40, 160))
+        self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
+        self.assertTrue((t_data[:] == data[:3,10:50,20:-20]).all())
+        # The random values goes from 2.5 to 10 with 0.5 steps.
+        t_data[:] = 1.5
+        self.assertTrue((t_data[:] == 1.5).all())
+        self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+        self.assertTrue((data[:] != 1.5).any())
+        nc.close(t_root)
+        with nc.loader('unittest0*.nc') as root:
+            data = nc.getvar(root, 'data')
+            self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:] != 1.5).any())
+
+    def test_list_multiple_files(self):
+        files = map(lambda i: 'unittest0%i.nc' % i, range(5))
+        t_root = nc.tailor(files, dimensions=self.dimensions)
         t_data = nc.getvar(t_root, 'data')
         data = nc.getvar(t_root.root, 'data')
         self.assertEquals(data.shape, (5, 100, 200))

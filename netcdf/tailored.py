@@ -102,7 +102,7 @@ class TileAdapter(object):
 class TileManager(object):
 
     def __init__(self, pattern_or_root, dimensions=None, distributed_dim=None):
-        if isinstance(pattern_or_root, str):
+        if pattern_or_root.__class__ in [str, list]:
             pattern_or_root = nc_open(pattern_or_root)[0]
         self.root = pattern_or_root
         self.distributed_dim=distributed_dim
