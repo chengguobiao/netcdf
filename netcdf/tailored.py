@@ -112,15 +112,8 @@ class TileManager(object):
         var = self.root.getvar(*args, **kwargs)
         return TileAdapter(self, var)
 
-    def sync(self):
-        self.root.sync()
-
-    def close(self):
-        self.root.close()
-
-    @property
-    def read_only(self):
-        return self.root.read_only
+    def __getattr__(self, name):
+        return getattr(self.root, name)
 
 
 def tailor(pattern_or_root, dimensions=None, distributed_dim='time'):

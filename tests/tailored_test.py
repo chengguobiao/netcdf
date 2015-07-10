@@ -93,6 +93,18 @@ class TestTailored(tests.base.TestCase):
             self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
 
+    def test_getdim(self):
+        dims = self.dimensions
+        with nc.loader('unittest_dims.nc', dimensions=dims) as t_root:
+            t_dim_x = nc.getdim(t_root, 'xc_k', 1)
+            t_dim_y = nc.getdim(t_root, 'yc_k', 1)
+            t_dim_time = nc.getdim(t_root, 'time', 1)
+            self.assertEquals(len(t_dim_x[0]), 1)
+            self.assertEquals(len(t_dim_y[0]), 1)
+            self.assertEquals(len(t_dim_time[0]), 1)
+            t_data = nc.getvar(t_root, 'only_one_pixel', 'f4', ('time', 'yc_k', 'xc_k'))
+            self.assertEquals(t_data.shape, (1, 1, 1))
+
     def test_getvar_source(self):
         dims = self.dimensions
         with nc.loader('unittest0*.nc', dimensions=dims) as t_root:
