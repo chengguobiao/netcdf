@@ -3,7 +3,7 @@ netcdf
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gersolar/netcdf?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![License](https://img.shields.io/pypi/l/netcdf.svg)](https://raw.githubusercontent.com/limiear/netcdf/master/LICENSE) [![Downloads](https://img.shields.io/pypi/dm/netcdf.svg)](https://pypi.python.org/pypi/netcdf/) [![Build Status](https://travis-ci.org/gersolar/netcdf.svg?branch=master)](https://travis-ci.org/gersolar/netcdf) [![Coverage Status](https://coveralls.io/repos/gersolar/netcdf/badge.png)](https://coveralls.io/r/gersolar/netcdf) [![Code Health](https://landscape.io/github/gersolar/netcdf/master/landscape.png)](https://landscape.io/github/gersolar/netcdf/master) [![PyPI version](https://badge.fury.io/py/netcdf.svg)](http://badge.fury.io/py/netcdf)
+[![License](https://img.shields.io/pypi/l/netcdf.svg)](https://raw.githubusercontent.com/gersolar/netcdf/master/LICENSE) [![Downloads](https://img.shields.io/pypi/dm/netcdf.svg)](https://pypi.python.org/pypi/netcdf/) [![Build Status](https://travis-ci.org/gersolar/netcdf.svg?branch=master)](https://travis-ci.org/gersolar/netcdf) [![Coverage Status](https://coveralls.io/repos/gersolar/netcdf/badge.png)](https://coveralls.io/r/gersolar/netcdf) [![Code Health](https://landscape.io/github/gersolar/netcdf/master/landscape.png)](https://landscape.io/github/gersolar/netcdf/master) [![PyPI version](https://badge.fury.io/py/netcdf.svg)](http://badge.fury.io/py/netcdf)
 [![Stories in Ready](https://badge.waffle.io/gersolar/netcdf.png?label=ready&title=Ready)](https://waffle.io/gersolar/netcdf)
 
 
