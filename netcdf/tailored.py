@@ -1,7 +1,4 @@
 from netcdf import open as nc_open
-import json
-import os
-from contextlib import contextmanager
 
 
 class TileAdapter(object):
@@ -12,7 +9,6 @@ class TileAdapter(object):
 
     def normalized_index(self, indexes, names):
         cls = indexes.__class__
-        s = lambda i: slice(indexes[i], indexes[i]+1, 1)
         answers = {
             slice: [indexes],
             list: indexes,
@@ -37,9 +33,9 @@ class TileAdapter(object):
         return names
 
     def adjust_index(self, args):
-        a = lambda n, m: m + n if n and n < 0 else n
         to_l = lambda s: [s.start, s.stop, s.step]
-        index, tail_limits, dim_limits = to_l(args[0]), to_l(args[1]), list(args[2])
+        index, tail_limits, dim_limits = (to_l(args[0]), to_l(args[1]),
+                                          list(args[2]))
         absolute = lambda n: dim_limits[1] + n if n and n < 0 else n
         if tail_limits == [None, None, None]:
             tail_limits = dim_limits + tail_limits[2:]
@@ -61,7 +57,9 @@ class TileAdapter(object):
         limits = map(lambda n: get_slice(n if n in self.manager.dimensions
                                          else self.distributed_dim), names)
         var_limits = zip([0] * len(shapes), shapes)
-        related = zip(self.normalized_index(indexes, names), limits, var_limits)
+        related = zip(self.normalized_index(indexes, names),
+                      limits,
+                      var_limits)
         indexes = map(self.adjust_index, related)
         # TODO: Adapt index selection.
         if len(indexes) < len(shapes) and shapes[0] is 1:
@@ -71,13 +69,12 @@ class TileAdapter(object):
     def translate(self, indexes):
         indexes = self.transform(indexes)
         limits = self.transform(slice(None))
-        outside = lambda (l, i): (l.start and l.stop and
-                                 (l.start > i.start or i.stop > l.stop))
+        outside = lambda (l, i): (l.start and l.stop
+                                  and (l.start > i.start or i.stop > l.stop))
         wrong = filter(outside, zip(limits, indexes))
         if wrong:
             raise Exception('Overflow: Index outside of the tile dimensions.')
         return indexes
-
 
     def __setitem__(self, indexes, changes):
         indexes = self.translate(indexes)
@@ -105,7 +102,7 @@ class TileManager(object):
         if pattern_or_root.__class__ in [str, list]:
             pattern_or_root = nc_open(pattern_or_root)[0]
         self.root = pattern_or_root
-        self.distributed_dim=distributed_dim
+        self.distributed_dim = distributed_dim
         self.dimensions = dimensions if dimensions else {}
 
     def getvar(self, *args, **kwargs):
@@ -118,8 +115,8 @@ class TileManager(object):
 
 def tailor(pattern_or_root, dimensions=None, distributed_dim='time'):
     """
-    Return a TileManager to wrap the root descriptor and tailor all the dimensions
-    to a specified window.
+    Return a TileManager to wrap the root descriptor and tailor all the
+    dimensions to a specified window.
 
     Keyword arguments:
     root -- a NCObject descriptor.
