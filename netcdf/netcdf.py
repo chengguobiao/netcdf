@@ -106,7 +106,9 @@ class NCObject(object):
         return [r.sync() for r in self.roots]
 
     def close(self):
-        return [r.close() for r in self.roots]
+        status = [r.close() for r in self.roots]
+        self.variables = None
+        return status
 
     def copy_in(self, name, vtype, source):
         # create dimensions if not exists.
