@@ -187,6 +187,12 @@ class NCVariable(object):
         self.name = name
         self.variables = (variables
                           if variables.__class__ is list else [variables])
+        not_auto_mask = lambda v: v.set_auto_maskandscale(False)
+        list(map(not_auto_mask, self.variables))
+
+    def set_auto_maskandscale(self, value):
+        not_auto_mask = lambda v: v.set_auto_maskandscale(value)
+        list(map(not_auto_mask, self.variables))
 
     def __eq__(self, obj):
         return (self.pack() == obj[:]).all()
