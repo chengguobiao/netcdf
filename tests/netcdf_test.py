@@ -64,6 +64,40 @@ class TestNetcdf(tests.base.TestCase):
         with self.assertRaisesRegexp(RuntimeError, u'NetCDF: Not a valid ID'):
             nc.close(root)
 
+    def test_open_close_file_with_readonly_restriction(self):
+        # check the file is NOT read only.
+        filename = 'unittest00.nc'
+        can_write = os.access(filename, os.W_OK)
+        self.assertTrue(can_write)
+        # check if open an existent file.
+        root, is_new = nc.open('unittest00.nc', read_only=True)
+        self.assertEquals(root.files, ['unittest00.nc'])
+        self.assertEquals(root.pattern, 'unittest00.nc')
+        self.assertEquals(len(root.roots), 1)
+        self.assertFalse(is_new)
+        self.assertTrue(root.read_only)
+        # check if close an existent file.
+        nc.close(root)
+        with self.assertRaisesRegexp(RuntimeError, u'NetCDF: Not a valid ID'):
+            nc.close(root)
+
+    def test_open_close_multiple_files_with_readonly_restriction(self):
+        # check the files are NOT read only.
+        filenames = map(lambda i: 'unittest0%i.nc' % i, range(5))
+        can_write = map(lambda f: os.access(f, os.W_OK), filenames)
+        self.assertTrue(all(can_write))
+        # check if open the pattern selection using using a package instance.
+        root, is_new = nc.open('unittest0*.nc', read_only=True)
+        self.assertEquals(root.files, ['unittest0%i.nc' % i for i in range(5)])
+        self.assertEquals(root.pattern, 'unittest0*.nc')
+        self.assertEquals(len(root.roots), 5)
+        self.assertFalse(is_new)
+        self.assertTrue(root.read_only)
+        # check if close the package with all the files.
+        nc.close(root)
+        with self.assertRaisesRegexp(RuntimeError, u'NetCDF: Not a valid ID'):
+            nc.close(root)
+
     def test_open_close_multiple_files(self):
         # check if open the pattern selection using using a package instance.
         root, is_new = nc.open('unittest0*.nc')

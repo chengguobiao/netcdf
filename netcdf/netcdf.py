@@ -25,11 +25,11 @@ DTYPES[numpy.dtype('S1')] = 'S1'
 class NCObject(object):
 
     @classmethod
-    def open(cls, files_or_pattern):
+    def open(cls, files_or_pattern, read_only=False):
         files, pattern = cls.distill(files_or_pattern)
         obj = cls.choice_type(files)
         obj.pattern = pattern
-        obj.load()
+        obj.load(read_only=read_only)
         return obj
 
     @classmethod
@@ -129,9 +129,11 @@ class NCObject(object):
 
 class NCFile(NCObject):
 
-    def load(self):
+    def load(self, read_only=False):
         filename = self.files[0]
         try:
+            if read_only:
+                raise Exception('Forced to be a read only access.')
             self.roots = [(Dataset(filename, mode='w', format='NETCDF4')
                            if self.is_new else Dataset(filename, mode='a',
                                                        format='NETCDF4'))]
@@ -167,8 +169,9 @@ class NCFile(NCObject):
 
 class NCPackage(NCObject):
 
-    def load(self):
-        self.roots = [NCObject.open(filename) for filename in self.files]
+    def load(self, read_only=False):
+        self.roots = [NCObject.open(filename, read_only)
+                      for filename in self.files]
         self.variable_wrapper = DistributedNCVariable
 
     @property
@@ -269,14 +272,14 @@ class DistributedNCVariable(NCVariable):
         self.sync()
 
 
-def open(pattern):
+def open(pattern, read_only=False):
     """
     Return a root descriptor to work with one or multiple NetCDF files.
 
     Keyword arguments:
     pattern -- a list of filenames or a string pattern.
     """
-    root = NCObject.open(pattern)
+    root = NCObject.open(pattern, read_only=read_only)
     return root, root.is_new
 
 
