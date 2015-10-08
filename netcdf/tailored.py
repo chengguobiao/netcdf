@@ -98,9 +98,10 @@ class TileAdapter(object):
 
 class TileManager(object):
 
-    def __init__(self, pattern_or_root, dimensions=None, distributed_dim=None):
+    def __init__(self, pattern_or_root, dimensions=None,
+                 distributed_dim=None, read_only=False):
         if pattern_or_root.__class__ in [str, list]:
-            pattern_or_root = nc_open(pattern_or_root)[0]
+            pattern_or_root = nc_open(pattern_or_root, read_only=read_only)[0]
         self.root = pattern_or_root
         self.distributed_dim = distributed_dim
         self.dimensions = dimensions if dimensions else {}
@@ -113,7 +114,8 @@ class TileManager(object):
         return getattr(self.root, name)
 
 
-def tailor(pattern_or_root, dimensions=None, distributed_dim='time'):
+def tailor(pattern_or_root, dimensions=None, distributed_dim='time',
+           read_only=False):
     """
     Return a TileManager to wrap the root descriptor and tailor all the
     dimensions to a specified window.
@@ -124,4 +126,4 @@ def tailor(pattern_or_root, dimensions=None, distributed_dim='time'):
     dimensions -- a dictionary to configurate the dimensions limits.
     """
     return TileManager(pattern_or_root, dimensions=dimensions,
-                       distributed_dim=distributed_dim)
+                       distributed_dim=distributed_dim, read_only=read_only)

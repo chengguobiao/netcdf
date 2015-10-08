@@ -76,6 +76,9 @@ class TestNetcdf(tests.base.TestCase):
         self.assertEquals(len(root.roots), 1)
         self.assertFalse(is_new)
         self.assertTrue(root.read_only)
+        with self.assertRaisesRegexp(Exception, u'NetCDF: Write to read only'):
+            var = nc.getvar(root, 'data')
+            var[:] = 0
         # check if close an existent file.
         nc.close(root)
         with self.assertRaisesRegexp(RuntimeError, u'NetCDF: Not a valid ID'):
@@ -93,6 +96,9 @@ class TestNetcdf(tests.base.TestCase):
         self.assertEquals(len(root.roots), 5)
         self.assertFalse(is_new)
         self.assertTrue(root.read_only)
+        with self.assertRaisesRegexp(Exception, u'NetCDF: Write to read only'):
+            var = nc.getvar(root, 'data')
+            var[:] = 0
         # check if close the package with all the files.
         nc.close(root)
         with self.assertRaisesRegexp(RuntimeError, u'NetCDF: Not a valid ID'):

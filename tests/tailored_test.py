@@ -1,7 +1,6 @@
 import tests.base
 import netcdf as nc
-import numpy as np
-from glob import glob
+import os
 
 
 class TestTailored(tests.base.TestCase):
@@ -83,19 +82,62 @@ class TestTailored(tests.base.TestCase):
         self.assertEquals(data.shape, (5, 100, 200))
         self.assertEquals(t_data.shape, (3, 40, 160))
         self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
-        self.assertTrue((t_data[:] == data[:3,10:50,20:-20]).all())
+        self.assertTrue((t_data[:] == data[:3, 10:50, 20:-20]).all())
         # The random values goes from 2.5 to 10 with 0.5 steps.
         t_data[:] = 1.5
         self.assertTrue((t_data[:] == 1.5).all())
-        self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+        self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
         self.assertTrue((data[:] != 1.5).any())
         nc.close(t_root)
         with nc.loader('unittest0*.nc') as root:
             data = nc.getvar(root, 'data')
-            self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
 
+    def test_file_with_readonly_restriction(self):
+        # check the file is NOT read only.
+        filename = 'unittest00.nc'
+        can_write = os.access(filename, os.W_OK)
+        self.assertTrue(can_write)
+        # check if open an existent file.
+        root = nc.tailor('unittest00.nc', dimensions=self.dimensions,
+                         read_only=True)
+        self.assertEquals(root.files, ['unittest00.nc'])
+        self.assertEquals(root.pattern, 'unittest00.nc')
+        self.assertEquals(len(root.roots), 1)
+        self.assertFalse(root.is_new)
+        self.assertTrue(root.read_only)
+        with self.assertRaisesRegexp(Exception, u'NetCDF: Write to read only'):
+            var = nc.getvar(root, 'data')
+            var[:] = 0
+        # check if close an existent file.
+        nc.close(root)
+        with self.assertRaisesRegexp(RuntimeError, u'NetCDF: Not a valid ID'):
+            nc.close(root)
+
+    def test_multiple_files_with_readonly_restriction(self):
+        # check the files are NOT read only.
+        filenames = map(lambda i: 'unittest0%i.nc' % i, range(5))
+        can_write = map(lambda f: os.access(f, os.W_OK), filenames)
+        self.assertTrue(all(can_write))
+        # check if open the pattern selection using using a package instance.
+        root = nc.tailor('unittest0*.nc', dimensions=self.dimensions,
+                         read_only=True)
+        self.assertEquals(root.files, ['unittest0%i.nc' % i for i in range(5)])
+        self.assertEquals(root.pattern, 'unittest0*.nc')
+        self.assertEquals(len(root.roots), 5)
+        self.assertFalse(root.is_new)
+        self.assertTrue(root.read_only)
+        with self.assertRaisesRegexp(Exception, u'NetCDF: Write to read only'):
+            var = nc.getvar(root, 'data')
+            var[:] = 0
+        # check if close the package with all the files.
+        nc.close(root)
+        with self.assertRaisesRegexp(RuntimeError, u'NetCDF: Not a valid ID'):
+            nc.close(root)
+
     def test_using_with(self):
+        # use the with to open the files.
         dims = self.dimensions
         with nc.loader('unittest0*.nc', dimensions=dims) as t_root:
             t_data = nc.getvar(t_root, 'data')
@@ -113,6 +155,27 @@ class TestTailored(tests.base.TestCase):
             data = nc.getvar(root, 'data')
             self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
+
+    def test_using_with_and_readonly_restriction(self):
+        # check the files are NOT read only.
+        filenames = map(lambda i: 'unittest0%i.nc' % i, range(5))
+        can_write = map(lambda f: os.access(f, os.W_OK), filenames)
+        self.assertTrue(all(can_write))
+        # use the with to open the files with readonly access.
+        dims = self.dimensions
+        with nc.loader('unittest0*.nc', dimensions=dims,
+                       read_only=True) as t_root:
+            self.assertTrue(t_root.read_only)
+            t_data = nc.getvar(t_root, 'data')
+            data = nc.getvar(t_root.root, 'data')
+            self.assertEquals(data.shape, (5, 100, 200))
+            self.assertEquals(t_data.shape, (3, 40, 160))
+            self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
+            self.assertTrue((t_data[:] == data[:3, 10:50, 20:-20]).all())
+            with self.assertRaisesRegexp(Exception,
+                                         u'NetCDF: Write to read only'):
+                var = nc.getvar(t_root, 'data')
+                var[:] = 0
 
     def test_getdim(self):
         dims = self.dimensions
