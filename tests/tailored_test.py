@@ -21,17 +21,17 @@ class TestTailored(tests.base.TestCase):
         self.assertEquals(data.shape, (1, 100, 200))
         self.assertEquals(t_data.shape, (1, 40, 160))
         self.assertEquals(nc.getvar(t_root, 'time').shape, (1,))
-        self.assertTrue((t_data[:] == data[:3,10:50,20:-20]).all())
+        self.assertTrue((t_data[:] == data[:3, 10:50, 20:-20]).all())
         # The random values goes from 2.5 to 10 with 0.5 steps.
         t_data[:] = 1.5
         nc.sync(t_root)
         self.assertTrue((t_data[:] == 1.5).all())
-        self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+        self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
         # self.assertTrue((data[:] != 1.5).any())
         nc.close(t_root)
         with nc.loader('unittest00.nc') as root:
             data = nc.getvar(root, 'data')
-            self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
             # self.assertTrue((data[:] != 1.5).any())
 
     def test_multiple_files(self):
@@ -43,16 +43,16 @@ class TestTailored(tests.base.TestCase):
         self.assertEquals(data.shape, (5, 100, 200))
         self.assertEquals(t_data.shape, (3, 40, 160))
         self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
-        self.assertTrue((t_data[:] == data[:3,10:50,20:-20]).all())
+        self.assertTrue((t_data[:] == data[:3, 10:50, 20:-20]).all())
         # The random values goes from 2.5 to 10 with 0.5 steps.
         t_data[:] = 1.5
         self.assertTrue((t_data[:] == 1.5).all())
-        self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+        self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
         self.assertTrue((data[:] != 1.5).any())
         nc.close(t_root)
         with nc.loader('unittest0*.nc') as root:
             data = nc.getvar(root, 'data')
-            self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
 
     def test_compact_multiple_files(self):
@@ -62,16 +62,16 @@ class TestTailored(tests.base.TestCase):
         self.assertEquals(data.shape, (5, 100, 200))
         self.assertEquals(t_data.shape, (3, 40, 160))
         self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
-        self.assertTrue((t_data[:] == data[:3,10:50,20:-20]).all())
+        self.assertTrue((t_data[:] == data[:3, 10:50, 20:-20]).all())
         # The random values goes from 2.5 to 10 with 0.5 steps.
         t_data[:] = 1.5
         self.assertTrue((t_data[:] == 1.5).all())
-        self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+        self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
         self.assertTrue((data[:] != 1.5).any())
         nc.close(t_root)
         with nc.loader('unittest0*.nc') as root:
             data = nc.getvar(root, 'data')
-            self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
 
     def test_list_multiple_files(self):
@@ -145,15 +145,15 @@ class TestTailored(tests.base.TestCase):
             self.assertEquals(data.shape, (5, 100, 200))
             self.assertEquals(t_data.shape, (3, 40, 160))
             self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
-            self.assertTrue((t_data[:] == data[:3,10:50,20:-20]).all())
+            self.assertTrue((t_data[:] == data[:3, 10:50, 20:-20]).all())
             # The random values goes from 2.5 to 10 with 0.5 steps.
             t_data[:] = 1.5
             self.assertTrue((t_data[:] == 1.5).all())
-            self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
         with nc.loader('unittest0*.nc') as root:
             data = nc.getvar(root, 'data')
-            self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
 
     def test_using_with_and_readonly_restriction(self):
@@ -186,7 +186,8 @@ class TestTailored(tests.base.TestCase):
             self.assertEquals(len(t_dim_x[0]), 1)
             self.assertEquals(len(t_dim_y[0]), 1)
             self.assertEquals(len(t_dim_time[0]), 1)
-            t_data = nc.getvar(t_root, 'only_one_pixel', 'f4', ('time', 'yc_k', 'xc_k'))
+            t_data = nc.getvar(t_root, 'only_one_pixel', 'f4',
+                               ('time', 'yc_k', 'xc_k'))
             self.assertEquals(t_data.shape, (1, 1, 1))
 
     def test_getvar_source(self):
@@ -198,15 +199,15 @@ class TestTailored(tests.base.TestCase):
             self.assertEquals(data.shape, (5, 100, 200))
             self.assertEquals(t_data.shape, (3, 40, 160))
             self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
-            self.assertTrue((t_data[:] == data[:3,10:50,20:-20]).all())
+            self.assertTrue((t_data[:] == data[:3, 10:50, 20:-20]).all())
             # The random values goes from 2.5 to 10 with 0.5 steps.
             t_data[:] = 1.5
             self.assertTrue((t_data[:] == 1.5).all())
-            self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
         with nc.loader('unittest0*.nc') as root:
             data = nc.getvar(root, 'new_data')
-            self.assertTrue((data[:3,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:3, 10:50, 20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
 
     def test_getvar_source_to_single_file(self):
@@ -218,14 +219,16 @@ class TestTailored(tests.base.TestCase):
                 data = nc.getvar(new_root, 'new_data', source=t_data)
                 self.assertEquals(t_data.shape, (3, 40, 160))
                 self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
-                self.assertTrue((t_data[:] == data[0,:3,10:50,20:-20]).all())
+                self.assertTrue(
+                    (t_data[:] == data[0, :3, 10:50, 20:-20]).all())
                 # The random values goes from 2.5 to 10 with 0.5 steps.
                 data[0:2, -30:-20, -10:-5] = 1.5
                 self.assertTrue((data[:] != 1.5).any())
 
     def test_getvar_source_to_multiple_files(self):
         dims = self.dimensions
-        self.mult = [self.create_ref_file('unittest_ot%s.nc' % (str(i).zfill(2)))
+        self.mult = [self.create_ref_file('unittest_ot%s.nc' %
+                                          (str(i).zfill(2)))
                      for i in range(5)]
         # TODO: It should spread the dimensions limits from the source.
         with nc.loader('unittest_ot0*.nc') as new_root:
@@ -234,7 +237,7 @@ class TestTailored(tests.base.TestCase):
                 data = nc.getvar(new_root, 'new_data', source=t_data)
                 self.assertEquals(t_data.shape, (3, 40, 160))
                 self.assertEquals(nc.getvar(t_root, 'time').shape, (3, 1))
-                self.assertTrue((t_data[:] == data[:3,10:50,20:-20]).all())
+                self.assertTrue((t_data[:] == data[:3, 10:50, 20:-20]).all())
                 # The random values goes from 2.5 to 10 with 0.5 steps.
                 data[0:2, -30:-20, -10:-5] = 1.5
                 self.assertTrue((data[:] != 1.5).any())
@@ -303,16 +306,16 @@ class TestTailored(tests.base.TestCase):
         self.assertEquals(data.shape, (5, 100, 200))
         self.assertEquals(t_data.shape, (5, 40, 160))
         self.assertEquals(nc.getvar(t_root, 'time').shape, (5, 1))
-        self.assertTrue((t_data[:] == data[:,10:50,20:-20]).all())
+        self.assertTrue((t_data[:] == data[:, 10:50, 20:-20]).all())
         # The random values goes from 2.5 to 10 with 0.5 steps.
         t_data[:] = 1.5
         self.assertTrue((t_data[:] == 1.5).all())
-        self.assertTrue((data[:,10:50,20:-20] == 1.5).all())
+        self.assertTrue((data[:, 10:50, 20:-20] == 1.5).all())
         self.assertTrue((data[:] != 1.5).any())
         nc.close(t_root)
         with nc.loader('unittest0*.nc') as root:
             data = nc.getvar(root, 'data')
-            self.assertTrue((data[:,10:50,20:-20] == 1.5).all())
+            self.assertTrue((data[:, 10:50, 20:-20] == 1.5).all())
             self.assertTrue((data[:] != 1.5).any())
 
 
