@@ -1,4 +1,4 @@
-from __future__ import print_function as print_
+from __future__ import print_function
 from netCDF4 import Dataset, numpy
 import numpy as np
 import os
@@ -229,7 +229,7 @@ class NCVariable(object):
         return self.pack().__getitem__(indexes)
 
     def __getattr__(self, name):
-        print_('Unhandled [class: {}, instance: {:s}, attr: {:s}]'.format(
+        print('Unhandled [class: {}, instance: {:s}, attr: {:s}]'.format(
             self.__class__, self.name, name))
         import ipdb
         ipdb.set_trace()
