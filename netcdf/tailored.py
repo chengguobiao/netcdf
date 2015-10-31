@@ -23,8 +23,7 @@ class TileAdapter(object):
         return self.manager.distributed_dim
 
     def dimensions_names(self):
-        dims = dict(map(lambda (k, v): (len(v), k),
-                        self.variable.dimensions.items()))
+        dims = {len(v): (k) for k, v in self.variable.dimensions.items()}
         names = filter(lambda n: n,
                        map(lambda sh: dims[sh] if sh in dims
                            else self.distributed_dim,
@@ -69,8 +68,11 @@ class TileAdapter(object):
     def translate(self, indexes):
         indexes = self.transform(indexes)
         limits = self.transform(slice(None))
-        outside = lambda (l, i): (l.start and l.stop
-                                  and (l.start > i.start or i.stop > l.stop))
+
+        def outside(args):
+            l, i = args
+            return (l.start and l.stop and
+                    (l.start > i.start or i.stop > l.stop))
         wrong = filter(outside, zip(limits, indexes))
         if wrong:
             raise Exception('Overflow: Index outside of the tile dimensions.')

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function as print_
+from __future__ import print_function as _print_
 from distutils.core import setup
 from distutils.command.build import build
 from setuptools.command import easy_install
@@ -130,8 +130,8 @@ class Builder(object):
                 progress = transfered * 100. / total_size
                 speed = (transfered /
                          ((datetime.now() - begin).total_seconds())) / 1024
-                print_('\r{:s}'.format(' ' * 78), end=' ')
-                print_(u'\rDownloaded {:s} (\033[33m{:03.2f} %\033[0m '
+                _print_('\r{:s}'.format(' ' * 78), end=' ')
+                _print_(u'\rDownloaded {:s} (\033[33m{:03.2f} %\033[0m '
                        'at \033[35m{:i} KB/s\033[0m)'.format(
                            filename, progress, speed), end=' ')
                 sys.stdout.flush()
@@ -159,7 +159,7 @@ class Builder(object):
             self.uncompress()
             title = '{:s} {:s}'.format(OS_NAME, p.architecture()[0])
             spacer = '-' * len(title)
-            print_('+{:s}+\n|{:s}|\n+{:s}+'.format(spacer, title, spacer))
+            _print_('+{:s}+\n|{:s}|\n+{:s}+'.format(spacer, title, spacer))
             import multiprocessing
             # self.call('sudo rm {:s}'.format(filename))
             path = '{:s}{:s}'.format(
