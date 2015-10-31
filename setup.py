@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function as print_
 from distutils.core import setup
 from distutils.command.build import build
 from setuptools.command import easy_install
@@ -41,8 +42,8 @@ OS_NAME = p.system()
 BINARIES = {
     'hdf5': {
         'version': '1.8.13',
-        'name': 'hdf5-%s',
-        'url': 'http://www.hdfgroup.org/ftp/HDF5/releases/%s/src',
+        'name': 'hdf5-{:s}',
+        'url': 'http://www.hdfgroup.org/ftp/HDF5/releases/{:s}/src',
         'compile': {
             'depends': ['pyandoc==0.0.1', 'numpy==1.8.0'],
             'config': {
@@ -53,7 +54,7 @@ BINARIES = {
     },
     'netcdf': {
         'version': '4.3.3',
-        'name': 'netcdf-%s',
+        'name': 'netcdf-{:s}',
         'url': 'ftp://ftp.unidata.ucar.edu/pub/netcdf',
         'compile': {
             'depends': [],
@@ -106,8 +107,8 @@ class Builder(object):
     def __init__(self, lib):
         self.lib_key = lib
         self.lib = BINARIES[lib]
-        self.name = self.lib['name'] % self.lib['version']
-        self.local_unpacked = '%s%s' % (TMP_PATH, self.name)
+        self.name = self.lib['name'].format(self.lib['version'])
+        self.local_unpacked = '{:s}{:s}'.format(TMP_PATH, self.name)
         self.local_filename = ''
 
     def call(self, cmd):
@@ -115,10 +116,10 @@ class Builder(object):
 
     def download(self):
         url = self.lib['url']
-        if url.find('%s') > 0:
-            url = url % self.name
-        filename = '%s.tar.gz' % self.name
-        self.local_filename = '%s%s' % (TMP_PATH, filename)
+        if url.find('{:s}') > 0:
+            url = url.format(self.name)
+        filename = '{:s}.tar.gz'.format(self.name)
+        self.local_filename = '{:s}{:s}'.format(TMP_PATH, filename)
         if not os.path.isfile(self.local_filename):
             begin = datetime.now()
 
@@ -129,25 +130,25 @@ class Builder(object):
                 progress = transfered * 100. / total_size
                 speed = (transfered /
                          ((datetime.now() - begin).total_seconds())) / 1024
-                print '\r%s' % (' ' * 78),
-                print (u'\rDownloaded %s '
-                       '(\033[33m%03.2f %%\033[0m at \033[35m%i KB/s\033[0m)'
-                       % (filename, progress, speed)),
+                print_('\r{:s}'.format(' ' * 78), end=' ')
+                print_(u'\rDownloaded {:s} (\033[33m{:03.2f} %\033[0m '
+                       'at \033[35m{:i} KB/s\033[0m)'.format(
+                           filename, progress, speed), end=' ')
                 sys.stdout.flush()
-            source = '%s/%s' % (url, filename)
-            destiny = '%s%s' % (TMP_PATH, filename)
+            source = '{:s}/{:s}'.format(url, filename)
+            destiny = '{:s}{:s}'.format(TMP_PATH, filename)
             self.local_filename, _ = urlretrieve(source, destiny,
                                                  reporthook=dl_progress)
 
     def uncompress(self):
         if not os.path.isdir(self.local_unpacked):
             self.download()
-            # self.call('rm -rf %s*' % self.local_unpacked)
+            # self.call('rm -rf {:s}*'.format(self.local_unpacked))
             import tarfile as tar
             tfile = tar.open(self.local_filename, mode='r:gz')
             tfile.extractall(TMP_PATH)
             tfile.close()
-            self.call('chmod -R ugo+rwx %s*' % self.local_unpacked)
+            self.call('chmod -R ugo+rwx {:s}*'.format(self.local_unpacked))
 
     def build(self):
         depends = self.lib['compile']['depends']
@@ -156,17 +157,19 @@ class Builder(object):
         filename = SYSTEMS[OS_NAME]['libs'][self.lib_key]
         if not os.path.isfile(filename):
             self.uncompress()
-            title = '%s %s' % (OS_NAME, p.architecture()[0])
+            title = '{:s} {:s}'.format(OS_NAME, p.architecture()[0])
             spacer = '-' * len(title)
-            print '+%s+\n|%s|\n+%s+' % (spacer, title, spacer)
+            print_('+{:s}+\n|{:s}|\n+{:s}+'.format(spacer, title, spacer))
             import multiprocessing
-            # self.call('sudo rm %s' % filename)
-            path = '%s%s' % (TMP_PATH, self.lib['name'] % self.lib['version'])
+            # self.call('sudo rm {:s}'.format(filename))
+            path = '{:s}{:s}'.format(
+                TMP_PATH,
+                self.lib['name'].format(self.lib['version']))
             config = self.lib['compile']['config']
             ncores = multiprocessing.cpu_count()
-            self.call(('cd %s; %s ./configure %s; make -j %s; '
-                       ' sudo make install')
-                      % (path, config['pre'], config['post'], ncores))
+            self.call(('cd {:s}; {:s} ./configure {:s}; make -j {:s}; '
+                       ' sudo make install').format(
+                           path, config['pre'], config['post'], ncores))
             update_shared_libs = SYSTEMS[OS_NAME]['update_shared_libs']
             if update_shared_libs:
                 self.call(update_shared_libs)
