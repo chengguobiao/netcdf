@@ -167,7 +167,7 @@ class Builder(object):
                 self.lib['name'].format(self.lib['version']))
             config = self.lib['compile']['config']
             ncores = multiprocessing.cpu_count()
-            self.call(('cd {:s}; {:s} ./configure {:s}; make -j {:i}; '
+            self.call(('cd {:s}; {:s} ./configure {:s}; make -j {:d}; '
                        ' sudo make install').format(
                            path, config['pre'], config['post'], ncores))
             update_shared_libs = SYSTEMS[OS_NAME]['update_shared_libs']
