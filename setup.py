@@ -132,7 +132,7 @@ class Builder(object):
                          ((datetime.now() - begin).total_seconds())) / 1024
                 print('\r{:s}'.format(' ' * 78), end=' ')
                 print(u'\rDownloaded {:s} (\033[33m{:03.2f} %\033[0m '
-                      'at \033[35m{:i} KB/s\033[0m)'.format(
+                      'at \033[35m{:10.0f} KB/s\033[0m)'.format(
                           filename, progress, speed), end=' ')
                 sys.stdout.flush()
             source = '{:s}/{:s}'.format(url, filename)
