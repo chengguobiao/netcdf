@@ -6,9 +6,12 @@ from distutils.command.build import build
 from setuptools.command import easy_install
 import os
 import subprocess
-from urllib import urlretrieve
 from datetime import datetime
 import sys
+if sys.version_info >= (3, 3):
+    from urllib.request import urlretrieve
+else:
+    from urllib import urlretrieve
 
 
 def parse_requirements(filename):
@@ -207,6 +210,9 @@ setup(
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Scientific/Engineering :: Atmospheric Science",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: GIS",
