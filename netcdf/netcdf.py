@@ -1,5 +1,7 @@
 from __future__ import print_function
-from netCDF4 import Dataset, numpy
+# Takes 1.746s
+# from h5netcdf import File
+from pupynere import netcdf_file
 import numpy as np
 import os
 from glob import glob
@@ -17,10 +19,12 @@ def flatten(lst):
 
 
 DTYPES = {}
-DTYPES[numpy.dtype('float32')] = 'f4'
-DTYPES[numpy.dtype('int32')] = 'i4'
-DTYPES[numpy.dtype('int8')] = 'i1'
-DTYPES[numpy.dtype('S1')] = 'S1'
+DTYPES['>f4'] = 'f4'
+DTYPES['>i4'] = 'i4'
+DTYPES['>i1'] = 'i8'
+DTYPES['S1'] = 'S1'
+DTYPES = {np.dtype(k): v for k, v in DTYPES.items()}
+DTYPES_REVERSE = {v: k for k, v in DTYPES.items()}
 
 
 class NCObject(object):
@@ -132,15 +136,13 @@ class NCFile(NCObject):
 
     def load(self, read_only=False):
         filename = self.files[0]
-        try:
-            if read_only:
-                raise Exception('Forced to be a read only access.')
-            self.roots = [(Dataset(filename, mode='w', format='NETCDF4')
-                           if self.is_new else Dataset(filename, mode='a',
-                                                       format='NETCDF4'))]
-            self._read_only = False
-        except Exception:
-            self.roots = [Dataset(filename, mode='r', format='NETCDF4')]
+        exists = os.path.exists(filename)
+        not_writable = (exists and not os.access(filename, os.W_OK))
+        self._read_only = not_writable or read_only
+        if self._read_only:
+            self.roots = [netcdf_file(filename, mode='r')]
+        else:
+            self.roots = [netcdf_file(filename, mode='r+' if exists else 'w+')]
         self.variable_wrapper = SingleNCVariable
         self.create_dim = 'createDimension'
 
@@ -158,13 +160,11 @@ class NCFile(NCObject):
     def create_variable(self, name, vtype='f4', dimensions=(), digits=0,
                         fill_value=None):
         build = self.roots[0].createVariable
-        options = {'zlib': True,
-                   'fill_value': fill_value}
-        if digits > 0:
-            options['least_significant_digit'] = digits
-        varstmp = [build(name, vtype, dimensions, **options)]
-        not_auto_mask = lambda v: v.set_auto_maskandscale(False)
-        list(map(not_auto_mask, varstmp))
+        varstmp = [build(name, vtype if vtype else 'f4',
+                         dimensions)]
+        if fill_value:
+            # import ipdb; ipdb.set_trace()
+            varstmp[0][:] = np.zeros(varstmp[0].shape) + fill_value
         return varstmp
 
 
@@ -191,14 +191,13 @@ class NCVariable(object):
         self.name = name
         self.variables = (variables
                           if variables.__class__ is list else [variables])
-        not_auto_mask = lambda v: v.set_auto_maskandscale(False)
-        list(map(not_auto_mask, self.variables))
 
     def set_auto_maskandscale(self, value):
         not_auto_mask = lambda v: v.set_auto_maskandscale(value)
         list(map(not_auto_mask, self.variables))
 
     def __eq__(self, obj):
+        print(self.name)
         return (self.pack() == obj[:]).all()
 
     @property
@@ -208,8 +207,7 @@ class NCVariable(object):
     @property
     def dimensions(self):
         var = self.variables[0]
-        dims = dict(var.group().dimensions)
-        return {d: dims[d] for d in var.dimensions}
+        return dict(zip(var.dimensions, var.shape))
 
     @property
     def least_significant_digit(self):
@@ -219,11 +217,11 @@ class NCVariable(object):
 
     @property
     def dtype(self):
-        return self.variables[0].dtype
+        return DTYPES[self.variables[0].dtype]
 
     @property
     def vtype(self):
-        return DTYPES[np.dtype(self.dtype)]
+        return self.dtype
 
     def __getitem__(self, indexes):
         return self.pack().__getitem__(indexes)
@@ -236,7 +234,7 @@ class NCVariable(object):
 
     def sync(self):
         for variable in self.variables:
-            variable.group().sync()
+            variable.sync()
 
     def copy_to(self, var):
         var[:] = self[:]
@@ -244,14 +242,12 @@ class NCVariable(object):
 
 class SingleNCVariable(NCVariable):
 
-    def group(self):
-        return self.variables[0].group()
-
     def pack(self):
         varstmp = self.variables[0]
-        if self.variables[0].shape[0] > 1:
-            varstmp = np.vstack([self.variables])
-        return varstmp
+        print("--", self.vtype)
+        if varstmp.shape[0] > 1:
+            varstmp = np.vstack(map(lambda m: m[:], self.variables))
+        return varstmp[:]
 
     def __setitem__(self, indexes, changes):
         return self.variables[0].__setitem__(indexes, changes)
@@ -297,7 +293,7 @@ def getdim(root, name, size=None):
     return root.getdim(name, size)
 
 
-def getvar(root, name, vtype='', dimensions=(), digits=0, fill_value=None,
+def getvar(root, name, vtype=None, dimensions=(), digits=0, fill_value=None,
            source=None):
     """
     Return a variable from a NCFile or NCPackage instance. If the variable
@@ -306,7 +302,7 @@ def getvar(root, name, vtype='', dimensions=(), digits=0, fill_value=None,
     Keyword arguments:
     root -- the root descriptor returned by the 'open' function
     name -- the name of the variable
-    vtype -- the type of each value, ex ['f4', 'i4', 'i1', 'S1'] (default '')
+    vtype -- the type of each value, ex ['f4', 'i4', 'i1', 'S1'] (default None)
     dimensions -- the tuple with dimensions name of the variables (default ())
     digits -- the precision required when using a 'f4' vtype (default 0)
     fill_value -- the initial value used in the creation time (default None)
@@ -348,7 +344,8 @@ def loader(pattern, dimensions=None, distributed_dim='time', read_only=False):
     root -- the root descriptor returned by the 'open' function
     """
     if dimensions:
-        root = tailor(pattern, dimensions, distributed_dim, read_only=read_only)
+        root = tailor(pattern, dimensions, distributed_dim,
+                      read_only=read_only)
     else:
         root, _ = open(pattern, read_only=read_only)
     yield root

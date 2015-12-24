@@ -1,4 +1,6 @@
 numpy==1.8.0
-h5py==2.3.1
-netCDF4==1.1.0
+# h5py==2.3.1
+# pupynere==1.0.15
+# h5netcdf==0.2.2
+# netCDF4==1.1.0
 mglob==0.4
